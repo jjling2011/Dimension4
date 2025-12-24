@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>The 4th dimension</title>
+        <script src="./libs/jquery.min.js"></script>
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
+    <body>
+        <div class="container">
+            <div class="row sep"></div>
+            <div class="row">
+                <div class="row" id="board-container">
+                    <canvas id="board"></canvas>
+                </div>
+                <div class="panel">
+                    <div class="row">
+                        <span class="label grow panel-tag">Coord</span>
+                    </div>
+                    <div class="row panel-group">
+                        <div class="row">
+                            <span class="label inline">Shape:</span>
+                            <select
+                                class="inline grow"
+                                id="coord-shapes"
+                                value="Cube"
+                            >
+                                <option>None</option>
+                                <option>Square</option>
+                                <option>Gray Cube</option>
+                                <option selected>Cube</option>
+                                <option>Unit Cube</option>
+                                <!-- <option>Sphere</option> -->
+                            </select>
+                        </div>
+                        <div class="row">
+                            <span class="label inline">Axes:</span>
+                            <select
+                                class="inline grow"
+                                id="coord-axes"
+                                value="3"
+                            >
+                                <option>2</option>
+                                <option>3</option>
+                                <option selected>4</option>
+                                <option>5</option>
+                                <option>6</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <span class="label inline">Ang:</span>
+                            <select
+                                class="inline grow"
+                                id="coord-max-ang"
+                                value="Average"
+                            >
+                                <option>PI/4</option>
+                                <option>PI/2</option>
+                                <option selected>Auto</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <span class="label grow panel-tag">Board</span>
+                    </div>
+                    <div class="row panel-group">
+                        <div class="row">
+                            <span class="label inline">Scale:</span>
+                            <input
+                                class="inline grow"
+                                type="range"
+                                id="board-scale"
+                                min="10"
+                                max="100"
+                                value="20"
+                            />
+                        </div>
+                        <div class="row">
+                            <span class="label inline">Move X:</span>
+                            <input
+                                class="inline grow"
+                                type="range"
+                                id="board-move-x"
+                                min="-100"
+                                max="100"
+                                value="0"
+                            />
+                        </div>
+                        <div class="row">
+                            <span class="label inline">Move Y:</span>
+                            <input
+                                class="inline grow"
+                                type="range"
+                                id="board-move-y"
+                                min="-100"
+                                max="100"
+                                value="0"
+                            />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <span class="label grow panel-tag">Rotation</span>
+                    </div>
+                    <div class="row panel-group">
+                        <div class="row">
+                            <span class="label inline">Plane:</span>
+                            <select
+                                class="inline grow"
+                                id="input-rotate-plane"
+                                value="xy"
+                            >
+                                <option selected>xy</option>
+                            </select>
+                        </div>
+                        <div class="row center">
+                            <button id="btn-rotate-forward">Forward</button>
+                            <button id="btn-rotate-backward">Backward</button>
+                            <button id="btn-rotate-stop">Stop</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row sep"></div>
+        </div>
+        <script type="module" src="./js/main.js"></script>
+    </body>
+</html>
