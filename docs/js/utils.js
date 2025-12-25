@@ -40,6 +40,18 @@ export function distance(p1, p2) {
     return Math.sqrt(d2)
 }
 
+export function cos(p1, p2) {
+    let dotp = 0
+    let sd1 = 0
+    let sd2 = 0
+    for (let i = 0; i < p1.length; i++) {
+        dotp += p1[i] * p2[i]
+        sd1 += p1[i] * p1[i]
+        sd2 += p2[i] * p2[i]
+    }
+    return dotp / Math.sqrt(sd1) / Math.sqrt(sd2)
+}
+
 export function trim_long_line(lines, len) {
     const l2 = []
     for (let line of lines) {

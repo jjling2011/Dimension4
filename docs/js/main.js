@@ -31,17 +31,21 @@ function main() {
     })
     $("#btn-rotate-reset").click(() => {
         stop_rotate()
-        coord.reset_angs()
-        coord.draw_lines(cur_shape)
+        reset_cur_shape()
+        coord.draw_shape(cur_shape)
     })
+
+    function reset_cur_shape() {
+        cur_shape = get_shape_by_name(cur_shape_name, coord.dimension)
+    }
 
     function updateBoardSettings() {
         const scale = Number(elBoardScale.val()) || 27
         const factor = Math.log10(scale / 10)
-        board.zoom(factor)
+        board.set_zoom_factor(factor)
         const mx = Number(elBoardMoveX.val()) || 0
         const my = Number(elBoardMoveY.val()) || 0
-        board.shift(mx / 100, my / 100)
+        board.move_center(mx / 100, my / 100)
         console.log(
             `board scale: ${elBoardScale.val()} max_x: ${elBoardMoveX.val()} max_y: ${elBoardMoveY.val()}`
         )
@@ -58,8 +62,8 @@ function main() {
     }
 
     function step(forward) {
-        const lines = coord.rotate(cur_shape, cur_plane, forward)
-        coord.draw_lines(lines)
+        coord.rotate(cur_shape, cur_plane, forward)
+        coord.draw_shape(cur_shape)
     }
 
     function rotate(forward) {
@@ -73,8 +77,8 @@ function main() {
         updateBoardSettings()
         updateCoordSettings()
 
-        cur_shape = get_shape_by_name(cur_shape_name, coord.dimension)
-        coord.draw_lines(cur_shape)
+        reset_cur_shape()
+        coord.draw_shape(cur_shape)
     }
 
     function update_option_el(el, options, defv) {

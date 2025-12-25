@@ -9,12 +9,12 @@ export class Board {
         this.sy = 0
     }
 
-    shift(x, y) {
+    move_center(x, y) {
         this.sx = this.cx * x
         this.sy = -1 * this.cy * y
     }
 
-    zoom(factor) {
+    set_zoom_factor(factor) {
         this.zoom_factor = factor || 0
     }
 
@@ -42,7 +42,7 @@ export class Board {
         return Number(l) * this.size * this.zoom_factor
     }
 
-    draw_text(text, x, y, color, size) {
+    draw_2d_text(text, x, y, color, size) {
         this.ctx.fillStyle = color || "whitesmoke"
         const s = Math.max(14, this.scalce(size || 0))
         this.ctx.font = `${s}px sans`
@@ -50,7 +50,7 @@ export class Board {
         this.ctx.fillText(`${text}`, px, py)
     }
 
-    draw_line(x1, y1, x2, y2, color, width) {
+    draw_2d_line(x1, y1, x2, y2, color, width) {
         this.ctx.lineWidth = Math.max(1, this.scalce(width)) // 0.003 -> 1
         this.ctx.strokeStyle = color || "white"
         const [p1x, p1y] = this.translate(x1, y1)
@@ -59,15 +59,5 @@ export class Board {
         this.ctx.moveTo(p1x, p1y)
         this.ctx.lineTo(p2x, p2y)
         this.ctx.stroke()
-    }
-
-    draw_circle(x, y, color, radius) {
-        this.ctx.fillStyle = color || "red"
-        const r = Math.max(1, this.scalce(radius))
-        this.ctx.beginPath()
-        const [px, py] = this.translate(x, y)
-        this.ctx.arc(px, py, r, 0, Math.PI * 2)
-        this.ctx.fill()
-        this.ctx.closePath()
     }
 }
