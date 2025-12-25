@@ -1,4 +1,4 @@
-这是一个绘制 4 维及更高维立方体的在线网页。[点击打开网页](https://jjling2011.github.io/Dimention4/)
+这是一个绘制 4 维及更高维立方体的在线网页。[点击打开网页](https://jjling2011.github.io/Dimension4/)
 
 ![cube4d.png](./readme/cube4d.png)
 
