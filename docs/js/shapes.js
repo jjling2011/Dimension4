@@ -1,15 +1,104 @@
 import * as utils from "./utils.js"
 
 export const Shapes = Object.freeze({
-    None: 0,
-    Square: 1,
-    Cube: 2,
-    UnitCube: 3,
-    GrayCube: 4,
-    Sphere: 5,
+    None: "None",
+    Square: "Square",
+    Cube: "Cube",
+    UnitCube: "Unit Cube",
+    GrayCube: "Gray Cube",
+    Circle3D: "Circle 3D",
+    Sphere3D: "Sphere 3D",
+    Octahedron3D: "Octahedron 3D",
+    Sphere3D32: "Sphere 32 3D",
 })
 
 const cache = {}
+
+export function get_shape_names() {
+    const names = Object.values(Shapes)
+    console.log(`shape names: ${names}`)
+    return names
+}
+
+function rotate_point(p, ang, a1, a2) {
+    const p2 = utils.clone(p)
+    const x = p[a1]
+    const y = p[a2]
+    p2[a1] = x * Math.cos(ang) - y * Math.sin(ang)
+    p2[a2] = x * Math.sin(ang) + y * Math.cos(ang)
+    return p2
+}
+
+function rotate_lines(lines, ang, a1, a2) {
+    const l2 = []
+    for (let line of lines) {
+        const start = rotate_point(line[0], ang, a1, a2)
+        const end = rotate_point(line[1], ang, a1, a2)
+        l2.push([start, end])
+    }
+    return l2
+}
+
+function genCircle3d(key, dimension) {
+    const n = 32
+    const lines = []
+
+    // circle
+    const circle = []
+    const dmax = Math.min(dimension, 3)
+    let start = utils.zero(dimension)
+    start[dmax - 1] = 1
+    const step = (2 * Math.PI) / n
+    for (let ang = 0; ang < 2 * Math.PI; ang += step) {
+        const end = rotate_point(start, step, dmax - 1, dmax - 2)
+        circle.push([start, end])
+        start = end
+    }
+    lines.push(...circle)
+
+    if (dimension > 2) {
+        const cxy = rotate_lines(circle, Math.PI / 2, 0, 2)
+        const cxz = rotate_lines(circle, Math.PI / 2, 0, 1)
+        lines.push(...cxy)
+        lines.push(...cxz)
+    }
+
+    cache[key] = utils.dedup_lines(lines)
+}
+
+function genSphere3d(key, dimension, n) {
+    const lines = []
+
+    // circle
+    const longitude = []
+    const latitude = []
+    const dmax = Math.min(dimension, 3)
+    let slong = utils.zero(dimension)
+    slong[dmax - 1] = 1
+    const step = (2 * Math.PI) / n
+    for (let ang = 0; ang < 2 * Math.PI; ang += step) {
+        const elong = rotate_point(slong, step, dmax - 1, dmax - 2)
+        longitude.push([slong, elong])
+        const elat = rotate_point(elong, step, 0, 1)
+        latitude.push([elong, elat])
+        slong = elong
+    }
+    lines.push(...longitude)
+
+    // 3d
+    if (dimension > 2) {
+        lines.push(...latitude)
+        for (let ang = 0; ang < Math.PI; ang += step) {
+            const rlong = rotate_lines(longitude, ang, 0, 1)
+            const rlat = rotate_lines(latitude, ang, 0, 1)
+            lines.push(...rlong)
+            lines.push(...rlat)
+        }
+    }
+
+    const l2 = utils.dedup_lines(lines)
+    cache[key] = utils.trim_short_line(l2, utils.MIN_DISTANCE)
+}
 
 function genCube(key, dimension) {
     const ps = []
@@ -25,7 +114,7 @@ function genCube(key, dimension) {
         ps.push(cur)
     }
     const lines = utils.to_lines(ps)
-    cache[key] = utils.filter_lines(lines, 1.01)
+    cache[key] = utils.trim_long_line(lines, 1.01)
 }
 
 function to_gray_line(g1, g2) {
@@ -105,24 +194,14 @@ function genUnitCube(key, dimension) {
         ps.push(cur)
     }
     const lines = utils.to_lines(ps)
-    cache[key] = utils.filter_lines(lines, 1.01)
+    cache[key] = utils.trim_long_line(lines, 1.01)
 }
 
-function to_key(shape, dimension) {
-    const keys = Object.keys(Shapes)
-    for (let i = 0; i < keys.length; i++) {
-        if (i === shape) {
-            return `${keys[i]}${dimension}`
-        }
-    }
-    throw new Error(`unkonw shape #${shape} dimension ${dimension}`)
-}
-
-export function GetShape(shape, dimension) {
-    const key = to_key(shape, dimension)
+export function get_shape_by_name(name, dimension) {
+    const key = `${name}@${dimension}`
     if (!cache[key]) {
         console.log(`create shape: ${key}`)
-        switch (shape) {
+        switch (name) {
             case Shapes.None:
                 genNone(key)
                 break
@@ -135,12 +214,26 @@ export function GetShape(shape, dimension) {
             case Shapes.UnitCube:
                 genUnitCube(key, dimension)
                 break
+            case Shapes.Circle3D:
+                genCircle3d(key, dimension)
+                break
+            case Shapes.Sphere3D:
+                genSphere3d(key, dimension, 24)
+                break
+            case Shapes.Octahedron3D:
+                genSphere3d(key, dimension, 4)
+                break
+            case Shapes.Sphere3D32:
+                genSphere3d(key, dimension, 32 / 4)
+                break
             default:
                 genCube(key, dimension)
                 break
         }
     } else {
-        console.log(`get share ${key} from cache`)
+        console.log(`get shape from cache: ${key}`)
     }
-    return utils.clone(cache[key])
+    const shape = cache[key]
+    console.log(`shape has ${shape.length} lines`)
+    return utils.clone(shape)
 }

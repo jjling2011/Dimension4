@@ -13,13 +13,14 @@ export class Coord {
         this.dimension = Math.min(6, Math.max(2, Math.floor(dimension || 2)))
     }
 
+    reset_angs() {
+        for (let name in this.angs) {
+            this.angs[name] = 0
+        }
+    }
+
     set_max_ang(max_ang) {
         this.max_ang = max_ang
-        const d = 10
-        const cam = utils.fill(this.dimension, -d)
-        cam[0] = (d * 2) / 3 // 0
-        cam[this.dimension - 1] = (d * 1) / 2 // 0
-        const axes = []
         let da = Math.PI / this.dimension
         switch (max_ang) {
             case "PI/4":
@@ -29,29 +30,45 @@ export class Coord {
                 da = Math.PI / 2 / (this.dimension - 1)
                 break
             default:
-                cam[0] = d
-                cam[this.dimension - 1] = d
                 break
         }
+        const axes = []
+        const zoomf = []
+        const factor = 0.5
         for (let i = 0; i < this.dimension; i++) {
-            axes.push(da * i)
+            const ang = da * i
+            axes.push(ang)
+            // cos(x) -> [-1, 1]
+            // (1 - x) / 2  -> [1, 0]
+            zoomf.push(1 - factor * ((1 - Math.cos(ang * 4)) / 2))
         }
+
+        const camd = 5
+        const cam = utils.fill(this.dimension, -camd)
+        cam[0] = camd // 0
+        cam[this.dimension - 1] = camd // 0
         this.cam = cam
         this.axes = axes
+        this.zoomf = zoomf
+        console.log(`zoom factor: ${zoomf}`)
+        console.log(`axis angles: ${axes}`)
     }
 
     get_planes() {
+        const angs = {}
         const planes = []
         for (let i = 0; i < this.dimension; i++) {
             for (let j = i + 1; j < this.dimension; j++) {
                 const name = `${AxesName[i]}${AxesName[j]}`
                 planes.push(name)
+                angs[name] = 0
             }
         }
+        this.angs = angs
         return planes
     }
 
-    toBoard(p) {
+    to_board_point(p) {
         let x = 0
         let y = 0
         for (let i = 0; i < this.dimension; i++) {
@@ -62,45 +79,59 @@ export class Coord {
         return [x, y]
     }
 
-    rotate(lines, plane, ang) {
-        const ix = AxesName.indexOf(plane[0])
-        const iy = AxesName.indexOf(plane[1])
-
-        if (ix < 0 || iy < 0 || ix >= this.dimension || iy >= this.dimension) {
+    plane_to_idx(plane) {
+        const i1 = AxesName.indexOf(plane[0])
+        const i2 = AxesName.indexOf(plane[1])
+        if (i1 < 0 || i2 < 0 || i1 >= this.dimension || i2 >= this.dimension) {
             throw new Error(`invalid plane ${plane}`)
         }
+        return [i1, i2]
+    }
 
-        for (let line of lines) {
-            for (let p of line) {
-                const x = p[ix]
-                const y = p[iy]
-                p[ix] = x * Math.cos(ang) - y * Math.sin(ang)
-                p[iy] = x * Math.sin(ang) + y * Math.cos(ang)
+    rotate(lines, plane, forward) {
+        const n = 100
+        const da = ((forward ? 1 : -1) * (2 * Math.PI)) / n
+        this.angs[plane] = (this.angs[plane] + da) % (Math.PI * 2)
+
+        const l2 = utils.clone(lines)
+        for (let name in this.angs) {
+            const ang = this.angs[name]
+            if (Math.abs(ang) < utils.MIN_ANG) {
+                continue
+            }
+            const [i1, i2] = this.plane_to_idx(name)
+            for (let line of l2) {
+                for (let p of line) {
+                    const x = p[i1]
+                    const y = p[i2]
+                    p[i1] = x * Math.cos(ang) - y * Math.sin(ang)
+                    p[i2] = x * Math.sin(ang) + y * Math.cos(ang)
+                }
             }
         }
+        return l2
     }
 
-    draw_line_raw(line, r1, r2, color) {
-        const [x1, y1] = this.toBoard(line[0])
-        const [x2, y2] = this.toBoard(line[1])
-        this.board.draw_line(x1 * r1, y1 * r1, x2 * r2, y2 * r2, color)
+    draw_line_raw(p1, p2, color) {
+        const [x1, y1] = this.to_board_point(p1)
+        const [x2, y2] = this.to_board_point(p2)
+        this.board.draw_line(x1, y1, x2, y2, color)
     }
 
-    draw_text_raw(p, r, text, color) {
-        const [x1, y1] = this.toBoard(p)
-        this.board.draw_text(text, x1 * r, y1 * r, color)
+    draw_text_raw(p, text, color) {
+        const [x1, y1] = this.to_board_point(p)
+        this.board.draw_text(text, x1, y1, color)
     }
 
-    to_color(d1, d2, min, diff) {
-        // (d1 + d2 - min - min) / diff -> [0, 2]
-        // (2 - x) * 100 + 50 -> [256, 50]
-        const r = (d1 + d2 - min - min) / diff
-        const g = (2 - r) * 105 + 40
-        const c = `rgb(0, ${g}, 0)`
+    to_color_value(d1, d2, min, diff) {
+        // (d1 + d2 - min - min) / diff / 2 -> [0, 1]
+        // 1 - x -> [1, 0]
+        const r = 1 - (d1 + d2 - min - min) / diff / 2
+        const c = r * 230 + 20
         return c
     }
 
-    to_scale_ration(distance, min, diff, factor) {
+    to_scene_ratio(distance, min, diff, factor) {
         // (distance - min) / diff -> [0, 1]
         // x * 2 -> [0, 2]
         // 1 - x -> [1, -1]
@@ -108,26 +139,43 @@ export class Coord {
         return 1 + factor * (1 - ((distance - min) / diff) * 2)
     }
 
-    draw_axes() {
+    draw_axes_name() {
         for (let i = 0; i < this.dimension; i++) {
-            const start = utils.zero(this.dimension)
-            start[i] = -2
-            const end = utils.zero(this.dimension)
-            end[i] = 2
-            this.draw_line_raw([start, end], 1, 1, "whitesmoke")
-            this.draw_text_raw(end, 1, AxesName[i], "whitesmoke")
+            const p = utils.zero(this.dimension)
+            p[i] = 2
+            this.draw_text_raw(p, AxesName[i], "whitesmoke")
         }
     }
 
-    draw_lines_2d(lines) {
-        this.board.clear()
-        this.draw_axes()
-        for (let line of lines) {
-            this.draw_line_raw(line, 1, 1, "green")
+    create_axes() {
+        const n = 40
+        const a = []
+        const step = 4 / n
+        for (let i = 0; i < this.dimension; i++) {
+            for (let j = -2; j < 2 - step; j += step) {
+                const start = utils.zero(this.dimension)
+                const end = utils.zero(this.dimension)
+                start[i] = j
+                end[i] = j + step
+                const d = utils.distance(this.cam, end)
+                a.push([start, end, "whitesmoke", d])
+            }
         }
+        return a
     }
 
-    draw_lines_3d(cam, lines) {
+    zoom(lines) {
+        const l2 = utils.clone(lines)
+        for (let line of l2) {
+            for (let i = 0; i < this.dimension; i++) {
+                line[0][i] *= this.zoomf[i]
+                line[1][i] *= this.zoomf[i]
+            }
+        }
+        return l2
+    }
+
+    draw_scene(cam, lines) {
         const lds = []
         let min = utils.MAX_DISTANCE
         let max = utils.MIN_DISTANCE
@@ -139,28 +187,29 @@ export class Coord {
             lds.push([d1, d2])
         }
 
+        const scene = this.create_axes()
+        const diff = max - min
+        for (let i = 0; i < lines.length; i++) {
+            const c = this.to_color_value(lds[i][0], lds[i][1], min, diff)
+            const d = (lds[i][0] + lds[i][1]) / 2
+            scene.push([lines[i][0], lines[i][1], `rgb(0, ${c}, 0)`, d])
+        }
+        scene.sort((a, b) => b[3] - a[3])
+
         // draw begin
         this.board.clear()
-        this.draw_axes()
-
-        // draw lines
-        const diff = max - min
-        const factor = 0.2
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i]
-            const r1 = this.to_scale_ration(lds[i][0], min, diff, factor)
-            const r2 = this.to_scale_ration(lds[i][1], min, diff, factor)
-            const color = this.to_color(lds[i][0], lds[i][1], min, diff)
-            this.draw_line_raw(line, r1, r2, color)
+        for (let o of scene) {
+            this.draw_line_raw(o[0], o[1], o[2])
         }
+        this.draw_axes_name()
     }
 
     draw_lines(lines) {
-        if (this.dimension < 3) {
-            this.draw_lines_2d(lines)
-            return
+        if (this.max_ang === "Auto") {
+            this.draw_scene(this.cam, lines)
+        } else {
+            const l2 = this.zoom(lines)
+            this.draw_scene(this.cam, l2)
         }
-        const cam = this.cam
-        this.draw_lines_3d(cam, lines)
     }
 }

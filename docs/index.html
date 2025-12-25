@@ -25,14 +25,7 @@
                                 class="inline grow"
                                 id="coord-shapes"
                                 value="Cube"
-                            >
-                                <option>None</option>
-                                <option>Square</option>
-                                <option>Gray Cube</option>
-                                <option selected>Cube</option>
-                                <option>Unit Cube</option>
-                                <!-- <option>Sphere</option> -->
-                            </select>
+                            ></select>
                         </div>
                         <div class="row">
                             <span class="label inline">Axes:</span>
@@ -42,8 +35,8 @@
                                 value="3"
                             >
                                 <option>2</option>
-                                <option>3</option>
-                                <option selected>4</option>
+                                <option selected>3</option>
+                                <option>4</option>
                                 <option>5</option>
                                 <option>6</option>
                             </select>
@@ -56,8 +49,8 @@
                                 value="Average"
                             >
                                 <option>PI/4</option>
-                                <option>PI/2</option>
-                                <option selected>Auto</option>
+                                <option selected>PI/2</option>
+                                <option>Auto</option>
                             </select>
                         </div>
                     </div>
@@ -73,7 +66,7 @@
                                 id="board-scale"
                                 min="10"
                                 max="100"
-                                value="20"
+                                value="27"
                             />
                         </div>
                         <div class="row">
@@ -117,6 +110,13 @@
                             <button id="btn-rotate-forward">Forward</button>
                             <button id="btn-rotate-backward">Backward</button>
                             <button id="btn-rotate-stop">Stop</button>
+                            <button id="btn-rotate-reset">Reset</button>
+                        </div>
+                        <div class="row center">
+                            <button id="btn-step-forward">Step Forward</button>
+                            <button id="btn-step-backward">
+                                Step Backward
+                            </button>
                         </div>
                     </div>
                 </div>

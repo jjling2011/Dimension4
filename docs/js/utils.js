@@ -1,5 +1,6 @@
 export const MIN_DISTANCE = 0.00001
 export const MAX_DISTANCE = 1000000.00001
+export const MIN_ANG = 0.00001
 
 export function get_cords() {
     return $("#cords").val().split(/[, ]+/).map(Number)
@@ -39,7 +40,7 @@ export function distance(p1, p2) {
     return Math.sqrt(d2)
 }
 
-export function filter_lines(lines, len) {
+export function trim_long_line(lines, len) {
     const l2 = []
     for (let line of lines) {
         const d = distance(...line)
@@ -47,7 +48,23 @@ export function filter_lines(lines, len) {
             l2.push(line)
         }
     }
-    console.log(`filter lines: ${lines.length} -> ${l2.length}`)
+    console.log(
+        `filter lines longer then ${len}: ${lines.length} -> ${l2.length}`
+    )
+    return l2
+}
+
+export function trim_short_line(lines, len) {
+    const l2 = []
+    for (let line of lines) {
+        const d = distance(...line)
+        if (d > len) {
+            l2.push(line)
+        }
+    }
+    console.log(
+        `filter lines shorter then ${len}: ${lines.length} -> ${l2.length}`
+    )
     return l2
 }
 
@@ -67,7 +84,7 @@ export function dedup_point(ps) {
             ps2.push(p)
         }
     }
-    console.log(`dedup point: ${ps.length} -> ${ps2.length}`)
+    console.log(`dedup points: ${ps.length} -> ${ps2.length}`)
     return ps2
 }
 

@@ -1,6 +1,6 @@
 import { Board } from "./board.js"
 import { Coord } from "./coord.js"
-import { Shapes, GetShape } from "./shapes.js"
+import { Shapes, get_shape_names, get_shape_by_name } from "./shapes.js"
 
 function main() {
     const board = new Board("board")
@@ -14,83 +14,86 @@ function main() {
     const elMaxAng = $("#coord-max-ang")
     const elPlanes = $("#input-rotate-plane")
 
+    let cur_shape_name = Shapes.Sphere3D
     let cur_shape = []
     let rotateHandle
+    let cur_plane = "xy"
     $("#btn-rotate-stop").click(() => stop_rotate())
     $("#btn-rotate-forward").click(() => rotate(true))
     $("#btn-rotate-backward").click(() => rotate(false))
+    $("#btn-step-forward").click(() => {
+        stop_rotate()
+        step(true)
+    })
+    $("#btn-step-backward").click(() => {
+        stop_rotate()
+        step(false)
+    })
+    $("#btn-rotate-reset").click(() => {
+        stop_rotate()
+        coord.reset_angs()
+        coord.draw_lines(cur_shape)
+    })
 
     function updateBoardSettings() {
-        const scale = Number(elBoardScale.val()) || 20
+        const scale = Number(elBoardScale.val()) || 27
         const factor = Math.log10(scale / 10)
         board.zoom(factor)
         const mx = Number(elBoardMoveX.val()) || 0
         const my = Number(elBoardMoveY.val()) || 0
         board.shift(mx / 100, my / 100)
+        console.log(
+            `board scale: ${elBoardScale.val()} max_x: ${elBoardMoveX.val()} max_y: ${elBoardMoveY.val()}`
+        )
     }
 
     function updateCoordSettings() {
         coord.set_dimension(Number(elAxes.val()) || 2)
         coord.set_max_ang(elMaxAng.val())
-        update_planes_name()
+        update_option_el(elPlanes, coord.get_planes())
     }
 
     function stop_rotate() {
         clearInterval(rotateHandle)
     }
 
-    function rotate(forward) {
-        stop_rotate()
-        const plane = elPlanes.val()
-        const ang = (((forward ? 1 : -1) * Math.PI) / 90) * 3
-        rotateHandle = setInterval(() => {
-            coord.rotate(cur_shape, plane, ang)
-            coord.draw_lines(cur_shape)
-        }, 200)
+    function step(forward) {
+        const lines = coord.rotate(cur_shape, cur_plane, forward)
+        coord.draw_lines(lines)
     }
 
-    function get_shape_lines() {
-        const dim = coord.dimension
-        switch (elShapes.val()) {
-            case "None":
-                return GetShape(Shapes.None, dim)
-            case "Square":
-                return GetShape(Shapes.Square, dim)
-            case "Unit Cube":
-                return GetShape(Shapes.UnitCube, dim)
-            case "Gray Cube":
-                return GetShape(Shapes.GrayCube, dim)
-            default:
-                return GetShape(Shapes.Cube, dim)
-        }
+    function rotate(forward) {
+        stop_rotate()
+        rotateHandle = setInterval(() => step(forward), 150)
     }
 
     function refresh() {
+        console.log(`call refresh()`)
         stop_rotate()
         updateBoardSettings()
         updateCoordSettings()
 
-        cur_shape = get_shape_lines()
+        cur_shape = get_shape_by_name(cur_shape_name, coord.dimension)
         coord.draw_lines(cur_shape)
     }
 
-    function update_planes_name() {
-        const cur = elPlanes.val()
-        elPlanes.empty()
+    function update_option_el(el, options, defv) {
+        const cur = el.val()
+        el.empty()
         let ok = false
-        const planes = coord.get_planes()
-        for (let name of planes) {
+        for (let name of options) {
             if (name === cur) {
                 ok = true
             }
-            elPlanes.append(
+            el.append(
                 $("<option>", {
                     value: name,
                     text: name,
                 })
             )
         }
-        elPlanes.val(ok ? cur : "xy")
+        el.val(ok ? cur : defv || options[0])
+        el.trigger("change")
     }
 
     $(window).on("resize", () => {
@@ -100,21 +103,33 @@ function main() {
 
     elPlanes.on("change", () => {
         stop_rotate()
+        cur_plane = elPlanes.val()
+        console.log(`select rotate plane: ${cur_plane}`)
+    })
+
+    elShapes.on("change", () => {
+        stop_rotate()
+        cur_shape_name = elShapes.val()
+        console.log(`select shape: ${cur_shape_name}`)
+        refresh()
     })
 
     for (let el of [
         elBoardScale,
         elBoardMoveX,
         elBoardMoveY,
-        elShapes,
         elMaxAng,
         elAxes,
     ]) {
         el.on("change", refresh)
     }
 
-    refresh()
+    function init() {
+        update_option_el(elShapes, get_shape_names(), cur_shape_name)
+        elPlanes.trigger("change")
+    }
+
+    init()
 }
 
-// 也可以直接使用 jQuery（因为它是全局的）
 $(document).ready(() => main())
