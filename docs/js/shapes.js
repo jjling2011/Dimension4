@@ -11,6 +11,7 @@ export const Shapes = Object.freeze({
     Sphere3D: "Sphere 3D",
     Octahedron3D: "Octahedron 3D",
     Sphere3D32: "Sphere 32 3D",
+    MobiusStrip3D: "Mobius strip 3D",
 })
 
 const cache = {}
@@ -19,6 +20,14 @@ export function get_shape_names() {
     const names = Object.values(Shapes)
     console.log(`shape names: ${names}`)
     return names
+}
+
+function add_points(p1, p2) {
+    const p = utils.clone(p1)
+    for (let i = 0; i < p1.length; i++) {
+        p[i] += p2[i]
+    }
+    return p
 }
 
 function rotate_point(p, ang, a1, a2) {
@@ -38,6 +47,40 @@ function rotate_lines(lines, ang, a1, a2) {
         l2.push([start, end])
     }
     return l2
+}
+
+function genMobiusStrip3d(key, dimension) {
+    // 能用就行，懒得优化了
+    const n = 80
+    const lines = []
+    const step1 = (Math.PI * 2) / n
+    const step2 = step1 / 2
+    let m1 = utils.zero(dimension)
+    m1[dimension - 1] = -0.1
+    let m2 = utils.zero(dimension)
+    m2[dimension - 1] = 0.1
+    let c = utils.zero(dimension)
+    c[0] = 1
+    m1 = rotate_point(m1, step2, dimension - 1, 0)
+    m2 = rotate_point(m2, step2, dimension - 1, 0)
+    let s1 = add_points(c, m1)
+    let s2 = add_points(c, m2)
+    lines.push([s1, s2])
+    for (let ang = 0; ang < Math.PI * 2; ang += step1) {
+        c = rotate_point(c, step1, 0, 1)
+        m1 = rotate_point(m1, step2, dimension - 1, 0)
+        m2 = rotate_point(m2, step2, dimension - 1, 0)
+        const mr1 = rotate_point(m1, step1, 0, 1)
+        const mr2 = rotate_point(m2, step1, 0, 1)
+        const e1 = add_points(c, mr1)
+        const e2 = add_points(c, mr2)
+        lines.push([s1, e1])
+        lines.push([s2, e2])
+        lines.push([e1, e2])
+        s1 = e1
+        s2 = e2
+    }
+    cache[key] = utils.dedup_lines(lines)
 }
 
 function genCircle2d(key, dimension) {
@@ -230,6 +273,9 @@ export function get_shape_by_name(name, dimension) {
                 break
             case Shapes.Circle2D:
                 genCircle2d(key, dimension)
+                break
+            case Shapes.MobiusStrip3D:
+                genMobiusStrip3d(key, dimension)
                 break
             case Shapes.GrayCube:
                 genGrayCube(key, dimension)

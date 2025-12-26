@@ -19,7 +19,13 @@ function main() {
     let rotateHandle
     let cur_plane = "xy"
 
-    function debug() {}
+    function debug() {
+        elShapes.val(Shapes.MobiusStrip3D)
+        elShapes.trigger("change")
+
+        elAxes.val(3)
+        elAxes.trigger("change")
+    }
 
     function update_board_settings() {
         const scale = Number(elBoardScale.val()) || 27
