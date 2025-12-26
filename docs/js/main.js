@@ -14,19 +14,12 @@ function main() {
     const board = new Board("board")
     const coord = new Coord(board)
 
-    let cur_shape_name = Shapes.Cube
+    let cur_shape_name = Shapes.Sphere3D
     let cur_shape = []
     let rotateHandle
     let cur_plane = "xy"
 
-    function debug() {
-        elMaxAng.val("PI/2")
-        elAxes.val(4)
-        update_coord_settings()
-
-        elShapes.val(Shapes.Sphere3D)
-        elShapes.trigger("change")
-    }
+    function debug() {}
 
     function update_board_settings() {
         const scale = Number(elBoardScale.val()) || 27
@@ -146,8 +139,13 @@ function main() {
         }
     }
 
+    function hide_loading_overlay() {
+        const overlay = document.getElementById("loadingOverlay")
+        overlay.style.display = "none"
+    }
+
     function init() {
-        console.log(`init()`)
+        console.log(`run init()`)
         init_element_event_handler()
         fill_options(elShapes, get_shape_names(), cur_shape_name)
         update_board_settings()
@@ -155,6 +153,7 @@ function main() {
         load_shape()
         update_canvas()
 
+        hide_loading_overlay()
         debug && debug()
     }
 

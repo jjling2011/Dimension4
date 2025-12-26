@@ -6,6 +6,33 @@
         <title>The 4th dimension</title>
         <script src="./libs/jquery.min.js"></script>
         <link rel="stylesheet" href="css/style.css" />
+        <style>
+            html,
+            body {
+                display: block;
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                background-color: #f0f0f0;
+            }
+
+            #loadingOverlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(128, 128, 128, 0.6); /* 半透明灰色背景 */
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 900;
+                color: white;
+                font-size: 24px;
+                text-align: center;
+            }
+        </style>
     </head>
     <body>
         <div class="container">
@@ -32,7 +59,7 @@
                             <select
                                 class="inline grow"
                                 id="coord-axes"
-                                value="3"
+                                value="4"
                             >
                                 <option>2</option>
                                 <option>3</option>
@@ -49,8 +76,8 @@
                                 value="Average"
                             >
                                 <option>PI/4</option>
-                                <option>PI/2</option>
-                                <option selected>Auto</option>
+                                <option selected>PI/2</option>
+                                <option>Auto</option>
                             </select>
                         </div>
                     </div>
@@ -123,6 +150,15 @@
             </div>
             <div class="row sep"></div>
         </div>
+        <div id="loadingOverlay">Loading...</div>
         <script type="module" src="./js/main.js"></script>
+        <script>
+            setTimeout(() => {
+                const overlay = document.getElementById("loadingOverlay")
+                if (!overlay.hidden) {
+                    overlay.textContent = "Network error! Press F5 to refresh."
+                }
+            }, 10000)
+        </script>
     </body>
 </html>
