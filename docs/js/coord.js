@@ -29,7 +29,7 @@ export class Coord {
         const axes = []
 
         const zoomf = []
-        const cam = []
+        const bulb = []
         const factor = Math.sin(Math.PI / 4)
         for (let i = 0; i < this.dimension; i++) {
             const ang = da * i
@@ -38,18 +38,18 @@ export class Coord {
             // (1 - x) / 2  -> [1, 0]
             zoomf.push(1 - factor * ((1 - Math.cos(ang * 4)) / 2))
             if (i === 0 || ang >= Math.PI / 2) {
-                cam.push(5)
+                bulb.push(5)
             } else {
-                cam.push(-5)
+                bulb.push(-5)
             }
         }
 
-        this.camera = cam
+        this.lightbulb = bulb
         this.axes = axes
         this.zoomf = zoomf
         console.log(`zoom factor: ${zoomf}`)
         console.log(`axis angles: ${axes}`)
-        console.log(`camera: ${cam}`)
+        console.log(`light bulb: ${bulb}`)
     }
 
     get_planes() {
@@ -160,7 +160,7 @@ export class Coord {
     }
 
     create_axes() {
-        const cam = this.camera
+        const bulb = this.lightbulb
         const n = 40
         const lines = []
         const step = 4 / n
@@ -173,10 +173,10 @@ export class Coord {
                 const end = utils.zero(this.dimension)
                 start[i] = j
                 end[i] = j + step
-                const d = utils.distance(cam, end)
+                const d = utils.distance(bulb, end)
                 min = Math.min(min, d)
                 max = Math.max(max, d)
-                crbs.push(this.to_red_blue(this.camera, end))
+                crbs.push(this.to_red_blue(this.lightbulb, end))
                 lines.push([start, end, "whitesmoke", d])
             }
         }
@@ -191,17 +191,17 @@ export class Coord {
     }
 
     draw_scene(lines) {
-        const cam = this.camera
+        const bulb = this.lightbulb
         const l2 = []
         let min = utils.MAX_DISTANCE
         let max = utils.MIN_DISTANCE
         const crbs = []
         for (let line of lines) {
-            const d1 = utils.distance(cam, line[0])
-            const d2 = utils.distance(cam, line[1])
+            const d1 = utils.distance(bulb, line[0])
+            const d2 = utils.distance(bulb, line[1])
             min = Math.min(min, d1, d2)
             max = Math.max(max, d1, d2)
-            const rb = this.to_red_blue(cam, line[1])
+            const rb = this.to_red_blue(bulb, line[1])
             crbs.push(rb)
             l2.push([line[0], line[1], "gray", d2])
         }

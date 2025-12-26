@@ -2,11 +2,12 @@ import * as utils from "./utils.js"
 
 export const Shapes = Object.freeze({
     None: "None",
-    Square: "Square",
+    Square2D: "Square 2D",
+    Circle2D: "Circle 2D",
     Cube: "Cube",
     UnitCube: "Unit Cube",
     GrayCube: "Gray Cube",
-    Circle3D: "Circle 3D",
+    Circle: "Circle",
     Sphere3D: "Sphere 3D",
     Octahedron3D: "Octahedron 3D",
     Sphere3D32: "Sphere 32 3D",
@@ -39,28 +40,45 @@ function rotate_lines(lines, ang, a1, a2) {
     return l2
 }
 
-function genCircle3d(key, dimension) {
+function genCircle2d(key, dimension) {
     const n = 32
     const lines = []
 
-    // circle
+    // plane xi
     const circle = []
-    const dmax = Math.min(dimension, 3)
     let start = utils.zero(dimension)
-    start[dmax - 1] = 1
+    start[0] = 1
     const step = (2 * Math.PI) / n
     for (let ang = 0; ang < 2 * Math.PI; ang += step) {
-        const end = rotate_point(start, step, dmax - 1, dmax - 2)
+        const end = rotate_point(start, step, 0, dimension - 1)
+        circle.push([start, end])
+        start = end
+    }
+    lines.push(...circle)
+    cache[key] = utils.dedup_lines(lines)
+}
+
+function genCircles(key, dimension) {
+    const n = 32
+    const lines = []
+
+    // plane xy
+    const circle = []
+    let start = utils.zero(dimension)
+    start[0] = 1
+    const step = (2 * Math.PI) / n
+    for (let ang = 0; ang < 2 * Math.PI; ang += step) {
+        const end = rotate_point(start, step, 0, 1)
         circle.push([start, end])
         start = end
     }
     lines.push(...circle)
 
-    if (dimension > 2) {
-        const cxy = rotate_lines(circle, Math.PI / 2, 0, 2)
-        const cxz = rotate_lines(circle, Math.PI / 2, 0, 1)
-        lines.push(...cxy)
-        lines.push(...cxz)
+    for (let i = 1; i < dimension; i++) {
+        const pxi = rotate_lines(circle, Math.PI / 2, 0, i)
+        lines.push(...pxi)
+        const pyi = rotate_lines(circle, Math.PI / 2, 1, i)
+        lines.push(...pyi)
     }
 
     cache[key] = utils.dedup_lines(lines)
@@ -68,29 +86,29 @@ function genCircle3d(key, dimension) {
 
 function genSphere3d(key, dimension, n) {
     const lines = []
+    const step = (2 * Math.PI) / n
 
-    // circle
+    const dm = Math.round((dimension - 1) / 2)
     const longitude = []
     const latitude = []
-    const dmax = Math.min(dimension, 3)
     let slong = utils.zero(dimension)
-    slong[dmax - 1] = 1
-    const step = (2 * Math.PI) / n
+    slong[dimension - 1] = 1
     for (let ang = 0; ang < 2 * Math.PI; ang += step) {
-        const elong = rotate_point(slong, step, dmax - 1, dmax - 2)
+        const elong = rotate_point(slong, step, 0, dimension - 1)
         longitude.push([slong, elong])
-        const elat = rotate_point(elong, step, 0, 1)
-        latitude.push([elong, elat])
         slong = elong
+        if (dimension > 2) {
+            const elat = rotate_point(elong, step, 0, dm)
+            latitude.push([elong, elat])
+        }
     }
     lines.push(...longitude)
+    lines.push(...latitude)
 
-    // 3d
     if (dimension > 2) {
-        lines.push(...latitude)
         for (let ang = 0; ang < Math.PI; ang += step) {
-            const rlong = rotate_lines(longitude, ang, 0, 1)
-            const rlat = rotate_lines(latitude, ang, 0, 1)
+            const rlong = rotate_lines(longitude, ang, 0, dm)
+            const rlat = rotate_lines(latitude, ang, 0, dm)
             lines.push(...rlong)
             lines.push(...rlat)
         }
@@ -146,11 +164,13 @@ function genGrayCube(key, dimension) {
     cache[key] = lines
 }
 
-function genSquare(key, dimension) {
+function genSquare2D(key, dimension) {
     const lines = []
     for (let i = 0; i < 4; i++) {
         lines.push([utils.zero(dimension), utils.zero(dimension)])
     }
+
+    const i2 = dimension - 1
 
     // l0.end.x
     lines[0][1][0] = 1
@@ -160,18 +180,18 @@ function genSquare(key, dimension) {
 
     // l1.end.xy
     lines[1][1][0] = 1
-    lines[1][1][1] = 1
+    lines[1][1][i2] = 1
 
     // l2.start.xy
     lines[2][0][0] = 1
-    lines[2][0][1] = 1
+    lines[2][0][i2] = 1
     // l2.end.xy
     lines[2][1][0] = 0
-    lines[2][1][1] = 1
+    lines[2][1][i2] = 1
 
     // l3.start.xy
     lines[3][0][0] = 0
-    lines[3][0][1] = 1
+    lines[3][0][i2] = 1
 
     cache[key] = lines
 }
@@ -205,8 +225,11 @@ export function get_shape_by_name(name, dimension) {
             case Shapes.None:
                 genNone(key)
                 break
-            case Shapes.Square:
-                genSquare(key, dimension)
+            case Shapes.Square2D:
+                genSquare2D(key, dimension)
+                break
+            case Shapes.Circle2D:
+                genCircle2d(key, dimension)
                 break
             case Shapes.GrayCube:
                 genGrayCube(key, dimension)
@@ -214,8 +237,8 @@ export function get_shape_by_name(name, dimension) {
             case Shapes.UnitCube:
                 genUnitCube(key, dimension)
                 break
-            case Shapes.Circle3D:
-                genCircle3d(key, dimension)
+            case Shapes.Circle:
+                genCircles(key, dimension)
                 break
             case Shapes.Sphere3D:
                 genSphere3d(key, dimension, 24)
