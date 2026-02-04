@@ -9,6 +9,7 @@ export class Board {
         this.sy = 0
     }
 
+    //#region public
     move_center(x, y) {
         this.sx = this.cx * x
         this.sy = -1 * this.cy * y
@@ -32,32 +33,35 @@ export class Board {
         this.ctx.clearRect(0, 0, this.width, this.height)
     }
 
-    translate(x, y) {
-        const px = this.scalce(x) + this.cx
-        const py = -1 * this.scalce(y) + this.cy
-        return [px + this.sx, py + this.sy]
-    }
-
-    scalce(l) {
-        return Number(l) * this.size * this.zoom_factor
-    }
-
     draw_2d_text(text, x, y, color, size) {
         this.ctx.fillStyle = color || "whitesmoke"
-        const s = Math.max(14, this.scalce(size || 0))
+        const s = Math.max(14, this.#scale(size || 0))
         this.ctx.font = `${s}px sans`
-        const [px, py] = this.translate(x, y)
+        const [px, py] = this.#translate(x, y)
         this.ctx.fillText(`${text}`, px, py)
     }
 
     draw_2d_line(x1, y1, x2, y2, color, width) {
-        this.ctx.lineWidth = Math.max(1, this.scalce(width)) // 0.003 -> 1
+        this.ctx.lineWidth = Math.max(1, this.#scale(width)) // 0.003 -> 1
         this.ctx.strokeStyle = color || "white"
-        const [p1x, p1y] = this.translate(x1, y1)
-        const [p2x, p2y] = this.translate(x2, y2)
+        const [p1x, p1y] = this.#translate(x1, y1)
+        const [p2x, p2y] = this.#translate(x2, y2)
         this.ctx.beginPath()
         this.ctx.moveTo(p1x, p1y)
         this.ctx.lineTo(p2x, p2y)
         this.ctx.stroke()
     }
+    //#endregion
+
+    //#region private
+    #translate(x, y) {
+        const px = this.#scale(x) + this.cx
+        const py = -1 * this.#scale(y) + this.cy
+        return [px + this.sx, py + this.sy]
+    }
+
+    #scale(l) {
+        return Number(l) * this.size * this.zoom_factor
+    }
+    //#endregion
 }

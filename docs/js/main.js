@@ -7,8 +7,8 @@ function main() {
     const elBoardMoveX = $("#board-move-x")
     const elBoardMoveY = $("#board-move-y")
     const elShapes = $("#coord-shapes")
-    const elAxes = $("#coord-axes")
-    const elMaxAng = $("#coord-max-ang")
+    const elDimension = $("#coord-axes-num")
+    const elCoordType = $("#coord-type")
     const elPlanes = $("#input-rotate-plane")
 
     const board = new Board("board")
@@ -20,11 +20,17 @@ function main() {
     let cur_plane = "xy"
 
     function debug() {
-        elShapes.val(Shapes.MobiusStrip3D)
+        console.log("====== debug() ========")
+
+        // must select dimension first!
+        elDimension.val(4)
+        elDimension.trigger("change")
+
+        elShapes.val(Shapes.Sphere3D)
         elShapes.trigger("change")
 
-        elAxes.val(3)
-        elAxes.trigger("change")
+        elPlanes.val("xw")
+        elPlanes.trigger("change")
     }
 
     function update_board_settings() {
@@ -35,18 +41,17 @@ function main() {
         const my = Number(elBoardMoveY.val()) || 0
         board.move_center(mx / 100, my / 100)
         console.log(
-            `board scale: ${elBoardScale.val()} max_x: ${elBoardMoveX.val()} max_y: ${elBoardMoveY.val()}`
+            `board scale: ${elBoardScale.val()} max_x: ${elBoardMoveX.val()} max_y: ${elBoardMoveY.val()}`,
         )
     }
 
     function update_coord_settings() {
-        coord.set_dimension(Number(elAxes.val()) || 2)
-        coord.set_max_ang(elMaxAng.val())
+        coord.reset_coord(elDimension.val(), elCoordType.val())
         fill_options(elPlanes, coord.get_planes())
     }
 
     function load_shape() {
-        cur_shape = get_shape_by_name(cur_shape_name, coord.dimension)
+        cur_shape = get_shape_by_name(cur_shape_name, coord.get_dimension())
     }
 
     function stop_rotate() {
@@ -83,7 +88,7 @@ function main() {
                 $("<option>", {
                     value: name,
                     text: name,
-                })
+                }),
             )
         }
         defv = defv || options[0]
@@ -125,12 +130,12 @@ function main() {
             update_canvas()
         })
 
-        elMaxAng.on("change", () => {
+        elCoordType.on("change", () => {
             update_coord_settings()
             update_canvas()
         })
 
-        elAxes.on("change", () => {
+        elDimension.on("change", () => {
             stop_rotate()
             update_coord_settings()
             load_shape()

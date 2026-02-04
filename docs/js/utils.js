@@ -1,10 +1,13 @@
+//#region constants
 export const MIN_DISTANCE = 0.00001
 export const MAX_DISTANCE = 1000000.00001
 export const MIN_ANG = 0.00001
 
-export function get_cords() {
-    return $("#cords").val().split(/[, ]+/).map(Number)
-}
+export const AXIS_NAMES = "abcdefghijklmnopqrstuvwzyx".split('').reverse()
+export const AXIS_SIZE = 1.5
+//#endregion
+
+//#region public
 
 export function to_gray(p, base) {
     const dimension = p.length
@@ -15,10 +18,6 @@ export function to_gray(p, base) {
         shift = shift + base - gray[i]
     }
     return gray
-}
-
-export function fill(dimension, value) {
-    return Array(dimension).fill(value)
 }
 
 export function to_lines(ps) {
@@ -80,7 +79,28 @@ export function trim_short_line(lines, len) {
     return l2
 }
 
-export function has_point(haystack, needle) {
+export function clone(o) {
+    // Source - https://stackoverflow.com/a
+    // Posted by G. Ghez
+    // Retrieved 2025-12-24, License - CC BY-SA 3.0
+    return JSON.parse(JSON.stringify(o))
+}
+
+export function dedup_lines(lines) {
+    const l2 = []
+    for (let line of lines) {
+        if (!has_line(l2, line)) {
+            l2.push(line)
+        }
+    }
+    console.log(`dedup lines from: ${lines.length} -> ${l2.length}`)
+    return l2
+}
+
+//#endregion
+
+//#region private
+function has_point(haystack, needle) {
     for (let p of haystack) {
         if (distance(p, needle) < MIN_DISTANCE) {
             return true
@@ -89,7 +109,7 @@ export function has_point(haystack, needle) {
     return false
 }
 
-export function dedup_point(ps) {
+function dedup_point(ps) {
     const ps2 = []
     for (let p of ps) {
         if (!has_point(ps2, p)) {
@@ -100,7 +120,7 @@ export function dedup_point(ps) {
     return ps2
 }
 
-export function diff_point(p1, p2) {
+function diff_point(p1, p2) {
     const n = p1.length
     if (n !== p2.length) {
         return true
@@ -111,7 +131,7 @@ export function diff_point(p1, p2) {
     return true
 }
 
-export function diff_line(l1, l2) {
+function diff_line(l1, l2) {
     if (!diff_point(l1[0], l2[0]) && !diff_point(l1[1], l2[1])) {
         return false
     }
@@ -130,25 +150,7 @@ function has_line(haystack, needle) {
     return false
 }
 
-export function dedup_lines(lines) {
-    const l2 = []
-    for (let line of lines) {
-        if (!has_line(l2, line)) {
-            l2.push(line)
-        }
-    }
-    console.log(`dedup lines from: ${lines.length} -> ${l2.length}`)
-    return l2
-}
-
-export function clone(o) {
-    // Source - https://stackoverflow.com/a
-    // Posted by G. Ghez
-    // Retrieved 2025-12-24, License - CC BY-SA 3.0
-    return JSON.parse(JSON.stringify(o))
-}
-
-export function connect_all(ps) {
+function connect_all(ps) {
     const lines = []
     for (let i = 0; i < ps.length; i++) {
         for (let j = 0; j < ps.length; j++) {
@@ -161,3 +163,5 @@ export function connect_all(ps) {
     console.log(`connect ${ps.length} points with ${lines.length} lines`)
     return lines
 }
+
+//#endregion

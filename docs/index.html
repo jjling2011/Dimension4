@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
@@ -57,26 +57,25 @@
                             <span class="label inline">Axes:</span>
                             <select
                                 class="inline grow"
-                                id="coord-axes"
+                                id="coord-axes-num"
                                 value="4"
                             >
                                 <option>2</option>
-                                <option>3</option>
-                                <option selected>4</option>
+                                <option selected>3</option>
+                                <option>4</option>
                                 <option>5</option>
                                 <option>6</option>
                             </select>
                         </div>
                         <div class="row">
-                            <span class="label inline">Ang:</span>
-                            <select
-                                class="inline grow"
-                                id="coord-max-ang"
-                                value="Average"
-                            >
+                            <span class="label inline">Type:</span>
+                            <select class="inline grow" id="coord-type">
                                 <option>PI/4</option>
-                                <option selected>PI/2</option>
-                                <option>Auto</option>
+                                <option>PI/2</option>
+                                <option>Avg</option>
+                                <option>SinXY</option>
+                                <option>CosXY</option>
+                                <option selected>ParabolaXY</option>
                             </select>
                         </div>
                     </div>
@@ -92,7 +91,7 @@
                                 id="board-scale"
                                 min="10"
                                 max="100"
-                                value="27"
+                                value="35"
                             />
                         </div>
                         <div class="row">
