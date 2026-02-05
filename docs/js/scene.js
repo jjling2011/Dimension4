@@ -36,34 +36,16 @@ export class Scene {
     }
 
     #create_axes() {
-        const bulb = this.#lightbulb
-        const n = 60
         const lines = []
-        const step = 4 / n
-        let min = utils.MAX_DISTANCE
-        let max = utils.MIN_DISTANCE
-        const crbs = []
         for (let i = 0; i < this.#dimension; i++) {
-            for (let j = -1 * utils.AXIS_SIZE; j < utils.AXIS_SIZE - step; j += step) {
-                const start = utils.zero(this.#dimension)
-                const end = utils.zero(this.#dimension)
-                start[i] = j
-                end[i] = j + step
-                const d = utils.distance(bulb, end)
-                min = Math.min(min, d)
-                max = Math.max(max, d)
-                crbs.push(to_red_blue(bulb, end))
-                lines.push([start, end, "whitesmoke", d])
-            }
+            const start = utils.zero(this.#dimension)
+            const end = utils.zero(this.#dimension)
+            start[i] = -1 * utils.AXIS_SIZE
+            end[i] = utils.AXIS_SIZE
+            lines.push([start, end])
         }
-        const diff = max - min
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i]
-            const g = to_green(line[3], min, diff)
-            const c = to_rgb(crbs[i], g)
-            line[2] = c
-        }
-        return lines
+        const l2 = utils.dlss(lines, 60)
+        return this.#dye(l2)
     }
 
     #dye(lines) {

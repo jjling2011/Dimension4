@@ -1,7 +1,14 @@
-import * as utils from "./utils.js"
-
 //#region axis mapper
 const creaters = {}
+
+function to_scale_fn(fn) {
+    return (
+        fn ||
+        function (ang, v) {
+            return v
+        }
+    )
+}
 
 function gen_straightline_mapper(ang, scale_fn) {
     return function (v) {
@@ -19,18 +26,18 @@ function rotate(x, y, ang) {
 }
 
 function gen_cos_wave_mapper(ang, scale_fn) {
+    const f = to_scale_fn(scale_fn)
     return function (v) {
-        const l = scale_fn ? scale_fn(ang, v) : v
-        const [tx, ty] = [l, Math.cos(l * 12) * 0.05]
-        return rotate(tx, ty, ang)
+        const [tx, ty] = [v, Math.cos(v * 12) * 0.05]
+        return rotate(f(ang, tx), f(ang, ty), ang)
     }
 }
 
 function gen_sin_wave_mapper(ang, scale_fn) {
+    const f = to_scale_fn(scale_fn)
     return function (v) {
-        const l = scale_fn ? scale_fn(ang, v) : v
-        const [tx, ty] = [l, Math.sin(l * 12) * 0.05]
-        return rotate(tx, ty, ang)
+        const [tx, ty] = [v, Math.sin(v * 12) * 0.05]
+        return rotate(f(ang, tx), f(ang, ty), ang)
     }
 }
 
@@ -45,11 +52,10 @@ function default_creater(dimension) {
     return fns
 }
 
-function gen_parabola_wave_mapper(ang, scale_fn) {
+function gen_parabola_wave_mapper(ang) {
     return function (v) {
-        const l = scale_fn ? scale_fn(ang, v) : v
-        const tx = l * (1 - Math.sin(ang / 2))
-        const ty = l * l / 3 * 2
+        const tx = v * (1 - Math.sin(ang / 2))
+        const ty = (v * v) / 4
         return [tx, ty]
     }
 }
@@ -68,8 +74,7 @@ creaters["ParabolaXY"] = function (dimension) {
     }
     for (let i = 2; i < dimension; i++) {
         const ang = da * i
-        // const f = gen_straightline_mapper(ang, scale_fn)
-        const f = gen_straightline_mapper(ang)
+        const f = gen_straightline_mapper(ang, scale_fn)
         fns.push(f)
     }
     return fns

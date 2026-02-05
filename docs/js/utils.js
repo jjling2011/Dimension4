@@ -3,11 +3,34 @@ export const MIN_DISTANCE = 0.00001
 export const MAX_DISTANCE = 1000000.00001
 export const MIN_ANG = 0.00001
 
-export const AXIS_NAMES = "abcdefghijklmnopqrstuvwzyx".split('').reverse()
+export const AXIS_NAMES = "abcdefghijklmnopqrstuvwzyx".split("").reverse()
 export const AXIS_SIZE = 1.5
 //#endregion
 
 //#region public
+
+export function dlss(lines, mul) {
+    const r = []
+    for (let line of lines) {
+        let per = clone(line[0])
+        const dim = per.length
+        const dd = []
+        for (let i = 0; i < dim; i++) {
+            const d = (line[1][i] - line[0][i]) / mul
+            dd.push(d)
+        }
+        for (let j = 0; j < mul; j++) {
+            const cur = zero(dim)
+            for (let i = 0; i < dim; i++) {
+                cur[i] = per[i] + dd[i]
+            }
+            r.push([per, cur])
+            per = cur
+        }
+    }
+    console.log(`dlss: ${lines.length} -> ${r.length}`)
+    return r
+}
 
 export function to_gray(p, base) {
     const dimension = p.length
@@ -60,7 +83,7 @@ export function trim_long_line(lines, len) {
         }
     }
     console.log(
-        `filter lines longer then ${len}: ${lines.length} -> ${l2.length}`
+        `filter lines longer then ${len}: ${lines.length} -> ${l2.length}`,
     )
     return l2
 }
@@ -74,7 +97,7 @@ export function trim_short_line(lines, len) {
         }
     }
     console.log(
-        `filter lines shorter then ${len}: ${lines.length} -> ${l2.length}`
+        `filter lines shorter then ${len}: ${lines.length} -> ${l2.length}`,
     )
     return l2
 }

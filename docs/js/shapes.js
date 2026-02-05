@@ -80,7 +80,9 @@ function genMobiusStrip3d(key, dimension) {
         s1 = e1
         s2 = e2
     }
-    cache[key] = utils.dedup_lines(lines)
+    const l1 = utils.dedup_lines(lines)
+    const l2 = utils.dlss(l1, 3)
+    cache[key] = l2
 }
 
 function genCircle2d(key, dimension) {
@@ -98,7 +100,7 @@ function genCircle2d(key, dimension) {
         start = end
     }
     lines.push(...circle)
-    cache[key] = utils.dedup_lines(lines)
+    cache[key] = utils.dlss(utils.dedup_lines(lines), 10)
 }
 
 function genCircles(key, dimension) {
@@ -124,7 +126,7 @@ function genCircles(key, dimension) {
         lines.push(...pyi)
     }
 
-    cache[key] = utils.dedup_lines(lines)
+    cache[key] = utils.dlss(utils.dedup_lines(lines), 10)
 }
 
 function genSphere3d(key, dimension, n) {
@@ -158,7 +160,9 @@ function genSphere3d(key, dimension, n) {
     }
 
     const l2 = utils.dedup_lines(lines)
-    cache[key] = utils.trim_short_line(l2, utils.MIN_DISTANCE)
+    const l3 = utils.trim_short_line(l2, utils.MIN_DISTANCE)
+    const l4 = utils.dlss(l3, (24 / n) * 5)
+    cache[key] = l4
 }
 
 function genCube(key, dimension) {
@@ -175,7 +179,8 @@ function genCube(key, dimension) {
         ps.push(cur)
     }
     const lines = utils.to_lines(ps)
-    cache[key] = utils.trim_long_line(lines, 1.01)
+    const l2 = utils.trim_long_line(lines, 1.01)
+    cache[key] = utils.dlss(l2, 30)
 }
 
 function to_gray_line(g1, g2) {
@@ -204,7 +209,8 @@ function genGrayCube(key, dimension) {
         lines.push(to_gray_line(prev, gray))
         prev = gray
     }
-    cache[key] = lines
+
+    cache[key] = utils.dlss(lines, 30)
 }
 
 function genSquare2D(key, dimension) {
@@ -236,7 +242,7 @@ function genSquare2D(key, dimension) {
     lines[3][0][0] = 0
     lines[3][0][i2] = 1
 
-    cache[key] = lines
+    cache[key] = utils.dlss(lines, 30)
 }
 
 function genNone(key) {
@@ -257,7 +263,8 @@ function genUnitCube(key, dimension) {
         ps.push(cur)
     }
     const lines = utils.to_lines(ps)
-    cache[key] = utils.trim_long_line(lines, 1.01)
+    const l2 = utils.trim_long_line(lines, 1.01)
+    cache[key] = utils.dlss(l2, 30)
 }
 
 export function get_shape_by_name(name, dimension) {
