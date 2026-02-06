@@ -1,5 +1,21 @@
+//#region  mapper names
+
+export const Mappers = Object.freeze({
+    PI2: "PI / 2",
+    PI4: "PI / 4",
+    Avg: "Average",
+    SinXY: "Sin XY",
+    CosXY: "Cos XY",
+    SquareXY: "Square XY",
+    CosAll: "Cos All",
+    SquareAll: "Square All",
+    CubicAll: "Cubic All",
+})
+
+//#endregion
+
 //#region axis mapper
-const creaters = {}
+const mcache = {}
 
 function to_scale_fn(fn) {
     if (fn) {
@@ -42,12 +58,30 @@ function gen_sin_wave_mapper(ang, scale_fn) {
     }
 }
 
-function default_creater(dimension) {
+function gen_cubic_line_mapper(ang) {
+    return function (v) {
+        const tx = v * (1 - Math.sin((ang * 2) / 3))
+        const ty = (v * v * v) / 2
+        return [tx, ty]
+    }
+}
+
+mcache[Mappers.Avg] = function (dimension) {
     const fns = []
     const da = Math.PI / dimension
     for (let i = 0; i < dimension; i++) {
         const ang = da * i
         const f = gen_straightline_mapper(ang)
+        fns.push(f)
+    }
+    return fns
+}
+
+mcache[Mappers.CubicAll] = function (dimension) {
+    const fns = []
+    const da = Math.PI / 2 / (dimension - 1)
+    for (let i = 0; i < dimension; i++) {
+        const f = gen_cubic_line_mapper(da * i)
         fns.push(f)
     }
     return fns
@@ -61,7 +95,17 @@ function gen_parabola_line_mapper(ang) {
     }
 }
 
-creaters["SquareXY"] = function (dimension) {
+mcache[Mappers.SquareAll] = function (dimension) {
+    const fns = []
+    const da = Math.PI / 2 / (dimension - 1)
+    for (let i = 0; i < dimension; i++) {
+        const f = gen_parabola_line_mapper(da * i)
+        fns.push(f)
+    }
+    return fns
+}
+
+mcache[Mappers.SquareXY] = function (dimension) {
     const fns = []
 
     const da = Math.PI / 2 / (dimension - 1)
@@ -81,7 +125,7 @@ creaters["SquareXY"] = function (dimension) {
     return fns
 }
 
-creaters["SinXY"] = function (dimension) {
+mcache[Mappers.SinXY] = function (dimension) {
     const fns = []
 
     function scale_fn(ang, v) {
@@ -101,7 +145,22 @@ creaters["SinXY"] = function (dimension) {
     return fns
 }
 
-creaters["CosXY"] = function (dimension) {
+mcache[Mappers.CosAll] = function (dimension) {
+    const fns = []
+
+    function scale_fn(ang, v) {
+        return v * (1 - Math.sin(2 * ang) / 2)
+    }
+
+    const da = Math.PI / 2 / (dimension - 1)
+    for (let i = 0; i < dimension; i++) {
+        const f = gen_cos_wave_mapper(da * i, scale_fn)
+        fns.push(f)
+    }
+    return fns
+}
+
+mcache[Mappers.CosXY] = function (dimension) {
     const fns = []
 
     function scale_fn(ang, v) {
@@ -121,7 +180,7 @@ creaters["CosXY"] = function (dimension) {
     return fns
 }
 
-creaters["PI/4"] = function (dimension) {
+mcache[Mappers.PI4] = function (dimension) {
     const fns = []
 
     function scale_fn(ang, v) {
@@ -137,7 +196,7 @@ creaters["PI/4"] = function (dimension) {
     return fns
 }
 
-creaters["PI/2"] = function (dimension) {
+mcache[Mappers.PI2] = function (dimension) {
     const fns = []
 
     function scale_fn(ang, v) {
@@ -164,7 +223,7 @@ export class Mapper {
 
     //#region private
     #create_map_funcs(dimension, coord_type) {
-        const creater = creaters[coord_type] ?? default_creater
+        const creater = mcache[coord_type] ?? mcache[Mappers.PI2]
         this.#fns = creater(dimension)
     }
 

@@ -1,6 +1,7 @@
 import { Board } from "./board.js"
 import { Coord } from "./coord.js"
-import { Shapes, get_shape_names, get_shape_by_name } from "./shapes.js"
+import { Shapes, get_shape_by_name } from "./shapes.js"
+import { Mappers } from "./mapper.js"
 
 function main() {
     const elBoardScale = $("#board-scale")
@@ -22,14 +23,17 @@ function main() {
     function debug() {
         console.log("====== debug() ========")
 
-        // must select dimension first!
-        elDimension.val(4)
+        // 1. select coord type
+        elCoordType.val(Mappers.CosXY)
+
+        // 2. select dimention
+        elDimension.val(3)
         elDimension.trigger("change")
 
         elShapes.val(Shapes.Sphere3D)
         elShapes.trigger("change")
 
-        elPlanes.val("xw")
+        elPlanes.val("yz")
         elPlanes.trigger("change")
     }
 
@@ -155,10 +159,15 @@ function main() {
         overlay.style.display = "none"
     }
 
+    function get_values(o) {
+        return Object.values(o)
+    }
+
     function init() {
         console.log(`run init()`)
         init_element_event_handler()
-        fill_options(elShapes, get_shape_names(), cur_shape_name)
+        fill_options(elShapes, get_values(Shapes), cur_shape_name)
+        fill_options(elCoordType, get_values(Mappers), Mappers.PI2)
         update_board_settings()
         update_coord_settings()
         load_shape()

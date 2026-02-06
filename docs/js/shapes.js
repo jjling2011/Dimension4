@@ -1,5 +1,6 @@
 import * as utils from "./utils.js"
 
+//#region shape names
 export const Shapes = Object.freeze({
     None: "None",
     Square2D: "Square 2D",
@@ -14,13 +15,9 @@ export const Shapes = Object.freeze({
     MobiusStrip3D: "Mobius strip 3D",
 })
 
-const cache = {}
+//#endregion
 
-export function get_shape_names() {
-    const names = Object.values(Shapes)
-    console.log(`shape names: ${names}`)
-    return names
-}
+const cache = {}
 
 function add_points(p1, p2) {
     const p = utils.clone(p1)
