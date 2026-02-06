@@ -2,17 +2,18 @@
 const creaters = {}
 
 function to_scale_fn(fn) {
-    return (
-        fn ||
-        function (ang, v) {
-            return v
-        }
-    )
+    if (fn) {
+        return fn
+    }
+    return function (_, v) {
+        return v
+    }
 }
 
 function gen_straightline_mapper(ang, scale_fn) {
+    const f = to_scale_fn(scale_fn)
     return function (v) {
-        const l = scale_fn ? scale_fn(ang, v) : v
+        const l = f(ang, v)
         const x = Math.cos(ang) * l
         const y = Math.sin(ang) * l
         return [x, y]
@@ -52,7 +53,7 @@ function default_creater(dimension) {
     return fns
 }
 
-function gen_parabola_wave_mapper(ang) {
+function gen_parabola_line_mapper(ang) {
     return function (v) {
         const tx = v * (1 - Math.sin(ang / 2))
         const ty = (v * v) / 4
@@ -60,13 +61,13 @@ function gen_parabola_wave_mapper(ang) {
     }
 }
 
-creaters["ParabolaXY"] = function (dimension) {
+creaters["SquareXY"] = function (dimension) {
     const fns = []
 
     const da = Math.PI / 2 / (dimension - 1)
 
-    const fx = gen_parabola_wave_mapper(0)
-    const fy = gen_parabola_wave_mapper(da)
+    const fx = gen_parabola_line_mapper(0)
+    const fy = gen_parabola_line_mapper(da)
     fns.push(fx, fy)
 
     function scale_fn(ang, v) {

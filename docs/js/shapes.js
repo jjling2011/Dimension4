@@ -49,7 +49,7 @@ function rotate_lines(lines, ang, a1, a2) {
     return l2
 }
 
-function genMobiusStrip3d(key, dimension) {
+function genMobiusStrip3d(dimension) {
     // 能用就行，懒得优化了
     const n = 80
     const lines = []
@@ -80,12 +80,10 @@ function genMobiusStrip3d(key, dimension) {
         s1 = e1
         s2 = e2
     }
-    const l1 = utils.dedup_lines(lines)
-    const l2 = utils.dlss(l1, 3)
-    cache[key] = l2
+    return utils.dedup_lines(lines)
 }
 
-function genCircle2d(key, dimension) {
+function genCircle2d(dimension) {
     const n = 32
     const lines = []
 
@@ -100,10 +98,10 @@ function genCircle2d(key, dimension) {
         start = end
     }
     lines.push(...circle)
-    cache[key] = utils.dlss(utils.dedup_lines(lines), 10)
+    return utils.dedup_lines(lines)
 }
 
-function genCircles(key, dimension) {
+function genCircles(dimension) {
     const n = 32
     const lines = []
 
@@ -126,10 +124,10 @@ function genCircles(key, dimension) {
         lines.push(...pyi)
     }
 
-    cache[key] = utils.dlss(utils.dedup_lines(lines), 10)
+    return utils.dedup_lines(lines)
 }
 
-function genSphere3d(key, dimension, n) {
+function genSphere3d(dimension, n) {
     const lines = []
     const step = (2 * Math.PI) / n
 
@@ -160,12 +158,10 @@ function genSphere3d(key, dimension, n) {
     }
 
     const l2 = utils.dedup_lines(lines)
-    const l3 = utils.trim_short_line(l2, utils.MIN_DISTANCE)
-    const l4 = utils.dlss(l3, (24 / n) * 5)
-    cache[key] = l4
+    return utils.trim_short_line(l2, utils.MIN_DISTANCE)
 }
 
-function genCube(key, dimension) {
+function genCube(dimension) {
     const ps = []
     const vs = [-0.5, 0.5]
     for (let i = 0; i < Math.pow(2, dimension); i++) {
@@ -179,8 +175,7 @@ function genCube(key, dimension) {
         ps.push(cur)
     }
     const lines = utils.to_lines(ps)
-    const l2 = utils.trim_long_line(lines, 1.01)
-    cache[key] = utils.dlss(l2, 30)
+    return utils.trim_long_line(lines, 1.01)
 }
 
 function to_gray_line(g1, g2) {
@@ -194,7 +189,7 @@ function to_gray_line(g1, g2) {
     return [p1, p2]
 }
 
-function genGrayCube(key, dimension) {
+function genGrayCube(dimension) {
     const lines = []
     let prev = utils.zero(dimension)
     for (let i = 1; i <= Math.pow(2, dimension); i++) {
@@ -209,11 +204,10 @@ function genGrayCube(key, dimension) {
         lines.push(to_gray_line(prev, gray))
         prev = gray
     }
-
-    cache[key] = utils.dlss(lines, 30)
+    return lines
 }
 
-function genSquare2D(key, dimension) {
+function genSquare2D(dimension) {
     const lines = []
     for (let i = 0; i < 4; i++) {
         lines.push([utils.zero(dimension), utils.zero(dimension)])
@@ -242,14 +236,10 @@ function genSquare2D(key, dimension) {
     lines[3][0][0] = 0
     lines[3][0][i2] = 1
 
-    cache[key] = utils.dlss(lines, 30)
+    return lines
 }
 
-function genNone(key) {
-    cache[key] = []
-}
-
-function genUnitCube(key, dimension) {
+function genUnitCube(dimension) {
     const ps = []
     const vs = [0, 1]
     for (let i = 0; i < Math.pow(2, dimension); i++) {
@@ -263,48 +253,46 @@ function genUnitCube(key, dimension) {
         ps.push(cur)
     }
     const lines = utils.to_lines(ps)
-    const l2 = utils.trim_long_line(lines, 1.01)
-    cache[key] = utils.dlss(l2, 30)
+    return utils.trim_long_line(lines, 1.01)
+}
+
+function create_shape(name, dimension) {
+    switch (name) {
+        case Shapes.None:
+            return []
+        case Shapes.Square2D:
+            return genSquare2D(dimension)
+        case Shapes.Circle2D:
+            return genCircle2d(dimension)
+        case Shapes.MobiusStrip3D:
+            return genMobiusStrip3d(dimension)
+        case Shapes.GrayCube:
+            return genGrayCube(dimension)
+        case Shapes.UnitCube:
+            return genUnitCube(dimension)
+        case Shapes.Circle:
+            return genCircles(dimension)
+        case Shapes.Sphere3D:
+            return genSphere3d(dimension, 24)
+        case Shapes.Octahedron3D:
+            return genSphere3d(dimension, 4)
+        case Shapes.Sphere3D32:
+            return genSphere3d(dimension, 32 / 4)
+        default:
+            break
+    }
+    return genCube(dimension)
 }
 
 export function get_shape_by_name(name, dimension) {
     const key = `${name}@${dimension}`
     if (!cache[key]) {
         console.log(`create shape: ${key}`)
-        switch (name) {
-            case Shapes.None:
-                genNone(key)
-                break
-            case Shapes.Square2D:
-                genSquare2D(key, dimension)
-                break
-            case Shapes.Circle2D:
-                genCircle2d(key, dimension)
-                break
-            case Shapes.MobiusStrip3D:
-                genMobiusStrip3d(key, dimension)
-                break
-            case Shapes.GrayCube:
-                genGrayCube(key, dimension)
-                break
-            case Shapes.UnitCube:
-                genUnitCube(key, dimension)
-                break
-            case Shapes.Circle:
-                genCircles(key, dimension)
-                break
-            case Shapes.Sphere3D:
-                genSphere3d(key, dimension, 24)
-                break
-            case Shapes.Octahedron3D:
-                genSphere3d(key, dimension, 4)
-                break
-            case Shapes.Sphere3D32:
-                genSphere3d(key, dimension, 32 / 4)
-                break
-            default:
-                genCube(key, dimension)
-                break
+        const raw_shape = create_shape(name, dimension)
+        if (name === Shapes.MobiusStrip3D) {
+            cache[key] = utils.dlss(raw_shape, 3)
+        } else {
+            cache[key] = utils.dlss(raw_shape)
         }
     } else {
         console.log(`get shape from cache: ${key}`)

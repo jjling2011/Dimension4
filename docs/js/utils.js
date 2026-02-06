@@ -10,6 +10,16 @@ export const AXIS_SIZE = 1.5
 //#region public
 
 export function dlss(lines, mul) {
+    const c = lines.length
+    if (!c || c < 1) {
+        return lines
+    }
+
+    mul = mul || Math.min(30, Math.floor(2000 / c))
+    if (mul < 2) {
+        return lines
+    }
+
     const r = []
     for (let line of lines) {
         let per = clone(line[0])
@@ -28,7 +38,7 @@ export function dlss(lines, mul) {
             per = cur
         }
     }
-    console.log(`dlss: ${lines.length} -> ${r.length}`)
+    console.log(`dlss(${mul}): ${c} -> ${r.length}`)
     return r
 }
 
