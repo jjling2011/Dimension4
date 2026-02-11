@@ -42,11 +42,11 @@
                 </div>
                 <div class="panel">
                     <div class="row">
-                        <span class="label grow panel-tag">Coord</span>
+                        <span class="label grow panel-tag">坐标系</span>
                     </div>
                     <div class="row panel-group">
                         <div class="row">
-                            <span class="label inline">Shape:</span>
+                            <span class="label inline">几何体</span>
                             <select
                                 class="inline grow"
                                 id="coord-shapes"
@@ -54,7 +54,7 @@
                             ></select>
                         </div>
                         <div class="row">
-                            <span class="label inline">Axes:</span>
+                            <span class="label inline">坐标轴</span>
                             <select
                                 class="inline grow"
                                 id="coord-axes-num"
@@ -68,7 +68,7 @@
                             </select>
                         </div>
                         <div class="row">
-                            <span class="label inline">Type:</span>
+                            <span class="label inline">坐标种类</span>
                             <select
                                 class="inline grow"
                                 id="coord-type"
@@ -76,11 +76,56 @@
                         </div>
                     </div>
                     <div class="row">
-                        <span class="label grow panel-tag">Board</span>
+                        <span class="label grow panel-tag">旋转几何体</span>
                     </div>
                     <div class="row panel-group">
                         <div class="row">
-                            <span class="label inline">Scale:</span>
+                            <span class="label inline">轴平面</span>
+                            <select
+                                class="inline grow"
+                                id="input-rotate-plane"
+                                value="xy"
+                            >
+                                <option selected>xy</option>
+                            </select>
+                        </div>
+                        <div class="row center">
+                            <button id="btn-step-forward">步进</button>
+                            <button id="btn-step-backward">步退</button>
+                            <button id="btn-rotate-reset">重置</button>
+                        </div>
+                        <div class="row center">
+                            <button id="btn-rotate-forward">前进</button>
+                            <button id="btn-rotate-backward">后退</button>
+                            <button id="btn-rotate-stop">停止</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <span class="label grow panel-tag">旋转坐标系</span>
+                    </div>
+                    <div class="row panel-group">
+                        <div class="row">
+                            <span class="label inline">轴平面</span>
+                            <select
+                                class="inline grow"
+                                id="input-axes-rotate-plane"
+                                value="xy"
+                            >
+                                <option selected>xy</option>
+                            </select>
+                        </div>
+                        <div class="row center">
+                            <button id="btn-axes-step-forward">步进</button>
+                            <button id="btn-axes-step-backward">步退</button>
+                            <button id="btn-axes-rotate-reset">重置</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <span class="label grow panel-tag">画板</span>
+                    </div>
+                    <div class="row panel-group">
+                        <div class="row">
+                            <span class="label inline">缩放</span>
                             <input
                                 class="inline grow"
                                 type="range"
@@ -91,7 +136,7 @@
                             />
                         </div>
                         <div class="row">
-                            <span class="label inline">Move X:</span>
+                            <span class="label inline">X 偏移</span>
                             <input
                                 class="inline grow"
                                 type="range"
@@ -102,7 +147,7 @@
                             />
                         </div>
                         <div class="row">
-                            <span class="label inline">Move Y:</span>
+                            <span class="label inline">Y 偏移</span>
                             <input
                                 class="inline grow"
                                 type="range"
@@ -111,33 +156,6 @@
                                 max="100"
                                 value="0"
                             />
-                        </div>
-                    </div>
-                    <div class="row">
-                        <span class="label grow panel-tag">Rotation</span>
-                    </div>
-                    <div class="row panel-group">
-                        <div class="row">
-                            <span class="label inline">Plane:</span>
-                            <select
-                                class="inline grow"
-                                id="input-rotate-plane"
-                                value="xy"
-                            >
-                                <option selected>xy</option>
-                            </select>
-                        </div>
-                        <div class="row center">
-                            <button id="btn-step-forward">Step Forward</button>
-                            <button id="btn-step-backward">
-                                Step Backward
-                            </button>
-                            <button id="btn-rotate-reset">Reset</button>
-                        </div>
-                        <div class="row center">
-                            <button id="btn-rotate-forward">Forward</button>
-                            <button id="btn-rotate-backward">Backward</button>
-                            <button id="btn-rotate-stop">Stop</button>
                         </div>
                     </div>
                 </div>

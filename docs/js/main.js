@@ -2,6 +2,7 @@ import { Board } from "./board.js"
 import { Coord } from "./coord.js"
 import { Shapes, get_shape_by_name } from "./shapes.js"
 import { Mappers } from "./mapper.js"
+import * as utils from "./utils.js"
 
 function main() {
     const elBoardScale = $("#board-scale")
@@ -11,6 +12,7 @@ function main() {
     const elDimension = $("#coord-axes-num")
     const elCoordType = $("#coord-type")
     const elPlanes = $("#input-rotate-plane")
+    const elAxesPlanes = $("#input-axes-rotate-plane")
 
     const board = new Board("board")
     const coord = new Coord(board)
@@ -21,20 +23,17 @@ function main() {
     let cur_plane = "xy"
 
     function debug() {
-        console.log("====== debug() ========")
+        utils.header("debug()")
 
         // 1. select coord type
         elCoordType.val(Mappers.CosXY)
 
         // 2. select dimention
-        elDimension.val(3)
-        elDimension.trigger("change")
+        elDimension.val(3).change()
+        elShapes.val(Shapes.Sphere3D).change()
+        elPlanes.val("yz").change()
 
-        elShapes.val(Shapes.Sphere3D)
-        elShapes.trigger("change")
-
-        elPlanes.val("yz")
-        elPlanes.trigger("change")
+        utils.header()
     }
 
     function update_board_settings() {
@@ -52,6 +51,7 @@ function main() {
     function update_coord_settings() {
         coord.reset_coord(elDimension.val(), elCoordType.val())
         fill_options(elPlanes, coord.get_planes())
+        fill_options(elAxesPlanes, coord.get_planes())
     }
 
     function load_shape() {
@@ -64,14 +64,14 @@ function main() {
 
     function step(forward) {
         stop_rotate()
-        coord.rotate(cur_shape, cur_plane, forward)
+        coord.rotate_shape(cur_shape, cur_plane, forward)
         update_canvas()
     }
 
     function rotate(forward) {
         stop_rotate()
         rotateHandle = setInterval(() => {
-            coord.rotate(cur_shape, cur_plane, forward)
+            coord.rotate_shape(cur_shape, cur_plane, forward)
             update_canvas()
         }, 150)
     }
@@ -113,6 +113,20 @@ function main() {
         $("#btn-rotate-reset").click(() => {
             stop_rotate()
             load_shape()
+            update_canvas()
+        })
+
+        function add_ang(forward) {
+            const plane = elAxesPlanes.val()
+            coord.add_ang(plane, forward)
+            update_canvas()
+        }
+
+        $("#btn-axes-step-forward").click(() => add_ang(true))
+        $("#btn-axes-step-backward").click(() => add_ang(false))
+
+        $("#btn-axes-rotate-reset").click(() => {
+            coord.reset_angs()
             update_canvas()
         })
 
@@ -164,7 +178,7 @@ function main() {
     }
 
     function init() {
-        console.log(`run init()`)
+        utils.header("init()")
         init_element_event_handler()
         fill_options(elShapes, get_values(Shapes), cur_shape_name)
         fill_options(elCoordType, get_values(Mappers), Mappers.PI2)

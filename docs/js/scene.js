@@ -2,10 +2,8 @@ import * as utils from "./utils.js"
 
 export class Scene {
     #board
-    #lightbulb
     #dimension
     #mapper
-    #axes
 
     constructor(board) {
         this.#board = board
@@ -22,34 +20,7 @@ export class Scene {
         this.#board.draw_2d_line(x1, y1, x2, y2, color)
     }
 
-    #draw_text(p, text, color) {
-        const [x1, y1] = this.#mapper.map(p)
-        this.#board.draw_2d_text(text, x1, y1, color)
-    }
-
-    #draw_axes_name() {
-        for (let i = 0; i < this.#dimension; i++) {
-            const p = utils.zero(this.#dimension)
-            p[i] = utils.AXIS_SIZE
-            this.#draw_text(p, utils.AXIS_NAMES[i], "whitesmoke")
-        }
-    }
-
-    #create_axes() {
-        const lines = []
-        for (let i = 0; i < this.#dimension; i++) {
-            const start = utils.zero(this.#dimension)
-            const end = utils.zero(this.#dimension)
-            start[i] = -1 * utils.AXIS_SIZE
-            end[i] = utils.AXIS_SIZE
-            lines.push([start, end])
-        }
-        const l2 = utils.dlss(lines, 60)
-        return this.#dye(l2)
-    }
-
-    #dye(lines) {
-        const bulb = this.#lightbulb
+    #dye(lines, bulb) {
         const l2 = []
         let min = utils.MAX_DISTANCE
         let max = utils.MIN_DISTANCE
@@ -82,36 +53,30 @@ export class Scene {
     reset_map_funcs(dimension, mapper) {
         this.#dimension = dimension
         this.#mapper = mapper
-        this.#lightbulb = create_lightbulb(dimension)
-        this.#axes = this.#create_axes()
     }
 
-    draw_shape(lines) {
-        const scene = this.#dye(lines)
-        scene.push(...this.#axes)
+    draw_text(p, text, color) {
+        const [x1, y1] = this.#mapper.map(p)
+        this.#board.draw_2d_text(text, x1, y1, color)
+    }
+
+    clear() {
+        this.#board.clear()
+    }
+
+    draw_shape(lines, bulb) {
+        const scene = this.#dye(lines, bulb)
         scene.sort((a, b) => b[3] - a[3])
 
         // draw begin
-        this.#board.clear()
         for (let o of scene) {
             this.#draw_line(o[0], o[1], o[2])
         }
-        this.#draw_axes_name()
     }
     //#endregion
 }
 
 //#region helper funcs
-function create_lightbulb(dimension) {
-    const bulb = utils.zero(dimension)
-    const half = Math.floor(dimension / 2)
-    bulb[0] = 5
-    bulb[half] = -5
-    bulb[dimension - 1] = 5
-    console.log(`light bulb: ${bulb}`)
-    return bulb
-}
-
 function to_green(d2, min, diff) {
     // (d1 + d2 - min - min) / diff / 2 -> [0, 1]
     // 1 - x -> [1, 0]

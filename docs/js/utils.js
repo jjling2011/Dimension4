@@ -8,6 +8,18 @@ export const AXIS_SIZE = 1.5
 //#endregion
 
 //#region public
+export function header(...args) {
+    const char = "="
+    if (!args || args.length < 1) {
+        console.log(char.repeat(24))
+        return
+    }
+    const pad = char.repeat(8)
+    const arr = [pad]
+    arr.push(args.join(" "))
+    arr.push(pad)
+    console.log(arr.join(" "))
+}
 
 export function dlss(lines, mul) {
     const c = lines.length
@@ -35,7 +47,7 @@ export function dlss(lines, mul) {
                 cur[i] = per[i] + dd[i]
             }
             r.push([per, cur])
-            per = cur
+            per = clone(cur)
         }
     }
     console.log(`dlss(${mul}): ${c} -> ${r.length}`)

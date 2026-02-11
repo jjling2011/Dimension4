@@ -4,7 +4,6 @@ export const Mappers = Object.freeze({
     PI2: "PI / 2",
     PI4: "PI / 4",
     Avg: "Average",
-    SinXY: "Sin XY",
     CosXY: "Cos XY",
     SquareXY: "Square XY",
     CosAll: "Cos All",
@@ -46,14 +45,6 @@ function gen_cos_wave_mapper(ang, scale_fn) {
     const f = to_scale_fn(scale_fn)
     return function (v) {
         const [tx, ty] = [v, Math.cos(v * 12) * 0.05]
-        return rotate(f(ang, tx), f(ang, ty), ang)
-    }
-}
-
-function gen_sin_wave_mapper(ang, scale_fn) {
-    const f = to_scale_fn(scale_fn)
-    return function (v) {
-        const [tx, ty] = [v, Math.sin(v * 12) * 0.05]
         return rotate(f(ang, tx), f(ang, ty), ang)
     }
 }
@@ -117,26 +108,6 @@ mcache[Mappers.SquareXY] = function (dimension) {
     function scale_fn(ang, v) {
         return v * (1 - Math.sin(2 * ang) / 2)
     }
-    for (let i = 2; i < dimension; i++) {
-        const ang = da * i
-        const f = gen_straightline_mapper(ang, scale_fn)
-        fns.push(f)
-    }
-    return fns
-}
-
-mcache[Mappers.SinXY] = function (dimension) {
-    const fns = []
-
-    function scale_fn(ang, v) {
-        return v * (1 - Math.sin(2 * ang) / 2)
-    }
-
-    const da = Math.PI / 2 / (dimension - 1)
-    const fx = gen_sin_wave_mapper(da * 0, scale_fn)
-    const fy = gen_sin_wave_mapper(da * 1, scale_fn)
-    fns.push(fx, fy)
-
     for (let i = 2; i < dimension; i++) {
         const ang = da * i
         const f = gen_straightline_mapper(ang, scale_fn)
