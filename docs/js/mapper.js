@@ -1,14 +1,15 @@
 //#region  mapper names
 
 export const Mappers = Object.freeze({
-    PI2: "PI / 2",
-    PI4: "PI / 4",
-    Avg: "Average",
-    CosXY: "Cos XY",
-    SquareXY: "Square XY",
-    CosAll: "Cos All",
-    SquareAll: "Square All",
-    CubicAll: "Cubic All",
+    PI2: "PI/2",
+    PI4: "PI/4",
+    Avg: "等轴",
+    CosXY: "余弦曲线XY",
+    SquareXY: "平方曲线XY",
+    CosAll: "余弦曲线",
+    SquareAll: "平方曲线",
+    CubicAll: "立方曲线",
+    CbrtAll: "立方根曲线",
 })
 
 //#endregion
@@ -73,6 +74,24 @@ mcache[Mappers.CubicAll] = function (dimension) {
     const da = Math.PI / 2 / (dimension - 1)
     for (let i = 0; i < dimension; i++) {
         const f = gen_cubic_line_mapper(da * i)
+        fns.push(f)
+    }
+    return fns
+}
+
+function gen_cbrt_line_mapper(ang) {
+    return function (v) {
+        const tx = v * (1 - (Math.sin(ang) * 7) / 8)
+        const ty = Math.cbrt(v) / 4
+        return [tx, ty]
+    }
+}
+
+mcache[Mappers.CbrtAll] = function (dimension) {
+    const fns = []
+    const da = Math.PI / 2 / (dimension - 1)
+    for (let i = 0; i < dimension; i++) {
+        const f = gen_cbrt_line_mapper(da * i)
         fns.push(f)
     }
     return fns

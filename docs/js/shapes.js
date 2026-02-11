@@ -3,16 +3,16 @@ import * as utils from "./utils.js"
 //#region shape names
 export const Shapes = Object.freeze({
     None: "None",
-    Square2D: "Square 2D",
-    Circle2D: "Circle 2D",
-    Cube: "Cube",
-    UnitCube: "Unit Cube",
-    GrayCube: "Gray Cube",
-    Circle: "Circle",
-    Sphere3D: "Sphere 3D",
-    Octahedron3D: "Octahedron 3D",
-    Sphere3D32: "Sphere 32 3D",
-    MobiusStrip3D: "Mobius strip 3D",
+    Square2D: "正方形2D",
+    Circle2D: "圆形2D",
+    Cube: "立方体",
+    UnitCube: "单位立方体",
+    GrayCube: "Gray线",
+    Circle: "圆圈",
+    Sphere3D: "球体3D",
+    Octahedron3D: "正八面体3D",
+    Sphere3D32: "稀疏球体3D",
+    MobiusStrip3D: "莫比乌斯环3D",
 })
 
 //#endregion
