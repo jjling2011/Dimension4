@@ -9,7 +9,7 @@ export const Mappers = Object.freeze({
     CosAll: "余弦曲线",
     SquareAll: "平方曲线",
     CubicAll: "立方曲线",
-    CbrtAll: "立方根曲线",
+    CubicRootAll: "立方根曲线",
 })
 
 //#endregion
@@ -81,13 +81,13 @@ mcache[Mappers.CubicAll] = function (dimension) {
 
 function gen_cbrt_line_mapper(ang) {
     return function (v) {
-        const tx = v * (1 - (Math.sin(ang) * 7) / 8)
-        const ty = Math.cbrt(v) / 4
+        const tx = v
+        const ty = Math.cbrt(v) * (Math.sin(ang / 2) + 0.25)
         return [tx, ty]
     }
 }
 
-mcache[Mappers.CbrtAll] = function (dimension) {
+mcache[Mappers.CubicRootAll] = function (dimension) {
     const fns = []
     const da = Math.PI / 2 / (dimension - 1)
     for (let i = 0; i < dimension; i++) {
@@ -97,7 +97,7 @@ mcache[Mappers.CbrtAll] = function (dimension) {
     return fns
 }
 
-function gen_parabola_line_mapper(ang) {
+function gen_square_line_mapper(ang) {
     return function (v) {
         const tx = v * (1 - Math.sin(ang / 2))
         const ty = (v * v) / 4
@@ -109,7 +109,7 @@ mcache[Mappers.SquareAll] = function (dimension) {
     const fns = []
     const da = Math.PI / 2 / (dimension - 1)
     for (let i = 0; i < dimension; i++) {
-        const f = gen_parabola_line_mapper(da * i)
+        const f = gen_square_line_mapper(da * i)
         fns.push(f)
     }
     return fns
@@ -120,8 +120,8 @@ mcache[Mappers.SquareXY] = function (dimension) {
 
     const da = Math.PI / 2 / (dimension - 1)
 
-    const fx = gen_parabola_line_mapper(0)
-    const fy = gen_parabola_line_mapper(da)
+    const fx = gen_square_line_mapper(0)
+    const fy = gen_square_line_mapper(da)
     fns.push(fx, fy)
 
     function scale_fn(ang, v) {
