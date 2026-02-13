@@ -83,6 +83,7 @@ function genMobiusStrip3d(dimension) {
 function genCircle2d(dimension) {
     const n = 32
     const lines = []
+    const i2 = 2 - 1
 
     // plane xi
     const circle = []
@@ -90,7 +91,7 @@ function genCircle2d(dimension) {
     start[0] = 1
     const step = (2 * Math.PI) / n
     for (let ang = 0; ang < 2 * Math.PI; ang += step) {
-        const end = rotate_point(start, step, 0, dimension - 1)
+        const end = rotate_point(start, step, 0, i2)
         circle.push([start, end])
         start = end
     }
@@ -125,35 +126,31 @@ function genCircles(dimension) {
 }
 
 function genSphere3d(dimension, n) {
+    dimension = Math.max(3, dimension)
     const lines = []
     const step = (2 * Math.PI) / n
 
-    const dm = Math.round((dimension - 1) / 2)
+    const d3 = 3 - 1
+    const d2 = 3 - 2
     const longitude = []
     const latitude = []
     let slong = utils.zero(dimension)
-    slong[dimension - 1] = 1
+    slong[d3] = 1
     for (let ang = 0; ang < 2 * Math.PI; ang += step) {
-        const elong = rotate_point(slong, step, 0, dimension - 1)
+        const elong = rotate_point(slong, step, 0, d3)
         longitude.push([slong, elong])
         slong = elong
-        if (dimension > 2) {
-            const elat = rotate_point(elong, step, 0, dm)
-            latitude.push([elong, elat])
-        }
+        const elat = rotate_point(elong, step, 0, d2)
+        latitude.push([elong, elat])
     }
     lines.push(...longitude)
     lines.push(...latitude)
-
-    if (dimension > 2) {
-        for (let ang = 0; ang < Math.PI; ang += step) {
-            const rlong = rotate_lines(longitude, ang, 0, dm)
-            const rlat = rotate_lines(latitude, ang, 0, dm)
-            lines.push(...rlong)
-            lines.push(...rlat)
-        }
+    for (let ang = 0; ang < Math.PI; ang += step) {
+        const rlong = rotate_lines(longitude, ang, 0, d2)
+        const rlat = rotate_lines(latitude, ang, 0, d2)
+        lines.push(...rlong)
+        lines.push(...rlat)
     }
-
     const l2 = utils.dedup_lines(lines)
     return utils.trim_short_line(l2, utils.MIN_DISTANCE)
 }
@@ -210,7 +207,7 @@ function genSquare2D(dimension) {
         lines.push([utils.zero(dimension), utils.zero(dimension)])
     }
 
-    const i2 = dimension - 1
+    const i2 = 2 - 1
 
     // l0.end.x
     lines[0][1][0] = 1

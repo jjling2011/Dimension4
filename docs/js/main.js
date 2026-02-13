@@ -8,16 +8,17 @@ function main() {
     const elBoardScale = $("#board-scale")
     const elBoardMoveX = $("#board-move-x")
     const elBoardMoveY = $("#board-move-y")
-    const elShapes = $("#coord-shapes")
-    const elDimension = $("#coord-axes-num")
+    const elShapeName = $("#shape-name")
+    const elShapeDimension = $("#shape-dimension")
+    const elShapePlane = $("#shape-rotate-plane")
+
     const elCoordType = $("#coord-type")
-    const elPlanes = $("#input-rotate-plane")
-    const elAxesPlanes = $("#input-axes-rotate-plane")
+    const elCoordDimension = $("#coord-dimension")
+    const elCoordPlane = $("#coord-rotate-plane")
 
     const board = new Board("board")
     const coord = new Coord(board)
 
-    let cur_shape_name = Shapes.Sphere3D
     let cur_shape = []
     let rotateHandle
     let cur_plane = "xy"
@@ -29,9 +30,9 @@ function main() {
         elCoordType.val(Mappers.CosXY)
 
         // 2. select dimention
-        elDimension.val(3).change()
-        elShapes.val(Shapes.Sphere3D).change()
-        elPlanes.val("yz").change()
+        elCoordDimension.val(3).change()
+        elShapeName.val(Shapes.Sphere3D).change()
+        elShapePlane.val("yz").change()
 
         utils.header()
     }
@@ -40,22 +41,34 @@ function main() {
         const scale = Number(elBoardScale.val()) || 27
         const factor = Math.log10(scale / 10)
         board.set_zoom_factor(factor)
-        const mx = Number(elBoardMoveX.val()) || 0
-        const my = Number(elBoardMoveY.val()) || 0
-        board.move_center(mx / 100, my / 100)
-        console.log(
-            `board scale: ${elBoardScale.val()} max_x: ${elBoardMoveX.val()} max_y: ${elBoardMoveY.val()}`,
-        )
+        const mx = (Number(elBoardMoveX.val()) || 0) / 100
+        const my = (Number(elBoardMoveY.val()) || 0) / 100
+        board.move_center(mx, my)
+        console.log(`board scale: ${elBoardScale.val()} origin: (${mx}, ${my})`)
+    }
+
+    function update_shape_settings() {
+        const d = get_max_dim()
+        fill_options(elShapePlane, utils.get_planes(d))
     }
 
     function update_coord_settings() {
-        coord.reset_coord(elDimension.val(), elCoordType.val())
-        fill_options(elPlanes, coord.get_planes())
-        fill_options(elAxesPlanes, coord.get_planes())
+        const dimension = elCoordDimension.val()
+        const name = elCoordType.val()
+        coord.reset_coord(dimension, name)
+        fill_options(elCoordPlane, utils.get_planes(dimension))
+    }
+
+    function get_max_dim() {
+        const shape_dim = parseInt(elShapeDimension.val())
+        const coord_dim = parseInt(elCoordDimension.val())
+        return Math.max(shape_dim, coord_dim)
     }
 
     function load_shape() {
-        cur_shape = get_shape_by_name(cur_shape_name, coord.get_dimension())
+        const name = elShapeName.val()
+        const d = get_max_dim()
+        cur_shape = get_shape_by_name(name, d)
     }
 
     function stop_rotate() {
@@ -117,7 +130,8 @@ function main() {
         })
 
         function add_ang(forward) {
-            const plane = elAxesPlanes.val()
+            const plane = elCoordPlane.val()
+            console.log(`coord rotating plane: ${cur_plane}`)
             coord.add_ang(plane, forward)
             update_canvas()
         }
@@ -135,15 +149,13 @@ function main() {
             update_canvas()
         })
 
-        elPlanes.on("change", () => {
-            cur_plane = elPlanes.val()
-            console.log(`select rotation plane: ${cur_plane}`)
+        elShapePlane.on("change", () => {
+            cur_plane = elShapePlane.val()
+            console.log(`shape rotating plane: ${cur_plane}`)
         })
 
-        elShapes.on("change", () => {
+        elShapeName.on("change", () => {
             stop_rotate()
-            cur_shape_name = elShapes.val()
-            console.log(`select shape: ${cur_shape_name}`)
             load_shape()
             update_canvas()
         })
@@ -153,9 +165,17 @@ function main() {
             update_canvas()
         })
 
-        elDimension.on("change", () => {
+        elShapeDimension.on("change", () => {
+            stop_rotate()
+            update_shape_settings()
+            load_shape()
+            update_canvas()
+        })
+
+        elCoordDimension.on("change", () => {
             stop_rotate()
             update_coord_settings()
+            update_shape_settings()
             load_shape()
             update_canvas()
         })
@@ -180,10 +200,11 @@ function main() {
     function init() {
         utils.header("init()")
         init_element_event_handler()
-        fill_options(elShapes, get_values(Shapes), cur_shape_name)
-        fill_options(elCoordType, get_values(Mappers), Mappers.PI2)
+        fill_options(elShapeName, get_values(Shapes))
+        fill_options(elCoordType, get_values(Mappers))
         update_board_settings()
         update_coord_settings()
+        update_shape_settings()
         load_shape()
         update_canvas()
 

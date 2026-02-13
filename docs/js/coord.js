@@ -37,20 +37,9 @@ export class Coord {
 
     reset_angs() {
         this.#angs = {}
-        for (let plane of this.get_planes()) {
+        for (let plane of utils.get_planes(this.#dimension)) {
             this.#angs[plane] = 0
         }
-    }
-
-    get_planes() {
-        const planes = []
-        for (let i = 0; i < this.#dimension; i++) {
-            for (let j = i + 1; j < this.#dimension; j++) {
-                const name = `${utils.AXIS_NAMES[i]}${utils.AXIS_NAMES[j]}`
-                planes.push(name)
-            }
-        }
-        return planes
     }
 
     rotate_shape(lines, plane, forward) {
@@ -61,9 +50,9 @@ export class Coord {
 
     draw_shape(lines) {
         const axes = utils.clone(this.#axes)
-        const shape = utils.clone(lines)
+        const shape = this.#copy_shape(lines)
         shape.push(...utils.clone(this.#hires_axes))
-        for (let plane of this.get_planes()) {
+        for (let plane of utils.get_planes(this.#dimension)) {
             this.#rotate_lines(axes, plane, this.#angs[plane])
             this.#rotate_lines(shape, plane, this.#angs[plane])
         }
@@ -74,6 +63,30 @@ export class Coord {
     //#endregion
 
     //#region private utils
+    #copy_shape(lines) {
+        if (lines.length < 1 || !lines[0]) {
+            return []
+        }
+
+        const d = this.#dimension
+        const org_d = lines[0][0].length
+        if (org_d === d) {
+            return utils.clone(lines)
+        }
+
+        const r = []
+        for (let line of lines) {
+            const start = utils.zero(d)
+            const end = utils.zero(d)
+            for (let i = 0; i < d; i++) {
+                start[i] = line[0][i] || 0
+                end[i] = line[1][i] || 0
+            }
+            r.push([start, end])
+        }
+        return r
+    }
+
     #gen_axes(dimension) {
         this.#bulb = create_lightbulb(dimension)
         this.#axes = create_axes(dimension)
@@ -81,7 +94,7 @@ export class Coord {
     }
 
     #rotate_lines(lines, plane, ang) {
-        const [i1, i2] = this.#plane_to_idx(plane)
+        const [i1, i2] = utils.plane_to_idx(plane)
         for (let line of lines) {
             for (let p of line) {
                 this.#rotate_point(p, ang, i1, i2)
@@ -107,19 +120,6 @@ export class Coord {
         this.#dimension = Number(s) || 2
     }
 
-    #plane_to_idx(plane) {
-        const i1 = utils.AXIS_NAMES.indexOf(plane[0])
-        const i2 = utils.AXIS_NAMES.indexOf(plane[1])
-        if (
-            i1 < 0 ||
-            i2 < 0 ||
-            i1 >= this.#dimension ||
-            i2 >= this.#dimension
-        ) {
-            throw new Error(`invalid plane ${plane}`)
-        }
-        return [i1, i2]
-    }
     //#endregion
 }
 

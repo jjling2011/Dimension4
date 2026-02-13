@@ -8,6 +8,28 @@ export const AXIS_SIZE = 1.5
 //#endregion
 
 //#region public
+
+export function plane_to_idx(plane) {
+    const i1 = AXIS_NAMES.indexOf(plane[0])
+    const i2 = AXIS_NAMES.indexOf(plane[1])
+    if (i1 < 0 || i2 < 0) {
+        throw new Error(`invalid plane ${plane}`)
+    }
+    return [i1, i2]
+}
+
+export function get_planes(dimension) {
+    const d = parseInt(`${dimension}`)
+    const planes = []
+    for (let i = 0; i < d; i++) {
+        for (let j = i + 1; j < d; j++) {
+            const name = `${AXIS_NAMES[i]}${AXIS_NAMES[j]}`
+            planes.push(name)
+        }
+    }
+    return planes
+}
+
 export function header(...args) {
     const char = "="
     if (!args || args.length < 1) {

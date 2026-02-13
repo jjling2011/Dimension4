@@ -42,22 +42,26 @@
                 </div>
                 <div class="panel">
                     <div class="row">
-                        <span class="label grow panel-tag">坐标系</span>
+                        <span class="label grow panel-tag">几何体</span>
                     </div>
                     <div class="row panel-group">
                         <div class="row">
-                            <span class="label inline">几何体</span>
+                            <span class="label inline">名字</span>
                             <select
                                 class="inline grow"
-                                id="coord-shapes"
+                                id="shape-name"
                                 value="Cube"
                             ></select>
                         </div>
                         <div class="row">
-                            <span class="label inline">坐标轴</span>
+                            <span
+                                class="label inline"
+                                title="几何体的每个点的坐标由多少个数值组成"
+                                >维度</span
+                            >
                             <select
                                 class="inline grow"
-                                id="coord-axes-num"
+                                id="shape-dimension"
                                 value="4"
                             >
                                 <option>2</option>
@@ -68,22 +72,10 @@
                             </select>
                         </div>
                         <div class="row">
-                            <span class="label inline">坐标种类</span>
+                            <span class="label inline">旋转平面</span>
                             <select
                                 class="inline grow"
-                                id="coord-type"
-                            ></select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <span class="label grow panel-tag">旋转几何体</span>
-                    </div>
-                    <div class="row panel-group">
-                        <div class="row">
-                            <span class="label inline">轴平面</span>
-                            <select
-                                class="inline grow"
-                                id="input-rotate-plane"
+                                id="shape-rotate-plane"
                                 value="xy"
                             >
                                 <option selected>xy</option>
@@ -101,14 +93,39 @@
                         </div>
                     </div>
                     <div class="row">
-                        <span class="label grow panel-tag">旋转坐标系</span>
+                        <span class="label grow panel-tag">坐标系</span>
                     </div>
                     <div class="row panel-group">
                         <div class="row">
-                            <span class="label inline">轴平面</span>
+                            <span class="label inline">种类</span>
                             <select
                                 class="inline grow"
-                                id="input-axes-rotate-plane"
+                                id="coord-type"
+                            ></select>
+                        </div>
+                        <div class="row">
+                            <span
+                                class="label inline"
+                                title="坐标系维度小于几何体维度时，就是高维几何体在低维空间的投影。"
+                                >维度</span
+                            >
+                            <select
+                                class="inline grow"
+                                id="coord-dimension"
+                                value="4"
+                            >
+                                <option>2</option>
+                                <option selected>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                                <option>6</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <span class="label inline">旋转平面</span>
+                            <select
+                                class="inline grow"
+                                id="coord-rotate-plane"
                                 value="xy"
                             >
                                 <option selected>xy</option>
@@ -136,7 +153,7 @@
                             />
                         </div>
                         <div class="row">
-                            <span class="label inline">X 偏移</span>
+                            <span class="label inline">横向偏移</span>
                             <input
                                 class="inline grow"
                                 type="range"
@@ -147,7 +164,7 @@
                             />
                         </div>
                         <div class="row">
-                            <span class="label inline">Y 偏移</span>
+                            <span class="label inline">纵向偏移</span>
                             <input
                                 class="inline grow"
                                 type="range"
