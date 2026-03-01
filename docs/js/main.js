@@ -27,12 +27,13 @@ function main() {
         utils.header("debug()")
 
         // 1. select coord type
-        elCoordType.val(Mappers.CosXY)
+        elCoordType.val(Mappers.Avg)
 
         // 2. select dimention
-        elCoordDimension.val(3).change()
-        elShapeName.val(Shapes.Sphere3D).change()
-        elShapePlane.val("yz").change()
+        elCoordDimension.val(4).change()
+        elShapeDimension.val(4).change()
+        elShapeName.val(Shapes.QuasiSphere).change()
+        elShapePlane.val("xy").change()
 
         utils.header()
     }

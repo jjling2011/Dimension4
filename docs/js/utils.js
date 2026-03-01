@@ -8,6 +8,11 @@ export const AXIS_SIZE = 1.5
 //#endregion
 
 //#region public
+export function idx_to_plane(idx1, idx2) {
+    const i1 = Math.min(idx1, idx2)
+    const i2 = Math.max(idx1, idx2)
+    return `${AXIS_NAMES[i1]}${AXIS_NAMES[i2]}`
+}
 
 export function plane_to_idx(plane) {
     const i1 = AXIS_NAMES.indexOf(plane[0])
@@ -87,9 +92,9 @@ export function to_gray(p, base) {
     return gray
 }
 
-export function to_lines(ps) {
+export function to_lines(ps, max_distance) {
     const ps2 = dedup_point(ps)
-    const lines = connect_all(ps2)
+    const lines = connect_all(ps2, max_distance)
     return dedup_lines(lines)
 }
 
@@ -144,6 +149,10 @@ export function trim_short_line(lines, len) {
         `filter lines shorter then ${len}: ${lines.length} -> ${l2.length}`,
     )
     return l2
+}
+
+export function format(o) {
+    return JSON.stringify(o, null, "  ")
 }
 
 export function clone(o) {
@@ -217,14 +226,18 @@ function has_line(haystack, needle) {
     return false
 }
 
-function connect_all(ps) {
+function connect_all(ps, max_distance) {
     const lines = []
     for (let i = 0; i < ps.length; i++) {
         for (let j = 0; j < ps.length; j++) {
             if (i === j) {
                 continue
             }
-            lines.push([ps[i], ps[j]])
+            if (!max_distance) {
+                lines.push([ps[i], ps[j]])
+            } else if (distance(ps[i], ps[j]) < max_distance) {
+                lines.push([ps[i], ps[j]])
+            }
         }
     }
     console.log(`connect ${ps.length} points with ${lines.length} lines`)

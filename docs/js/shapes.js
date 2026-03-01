@@ -3,12 +3,13 @@ import * as utils from "./utils.js"
 //#region shape names
 export const Shapes = Object.freeze({
     None: "None",
-    Square2D: "正方形2D",
-    Circle2D: "圆形2D",
     Cube: "立方体",
     UnitCube: "单位立方体",
     GrayCube: "Gray线",
     Circle: "圆圈",
+    QuasiSphere: "类球体",
+    Square2D: "正方形2D",
+    Circle2D: "圆形2D",
     Sphere3D: "球体3D",
     Octahedron3D: "正八面体3D",
     Sphere3D32: "稀疏球体3D",
@@ -155,6 +156,76 @@ function genSphere3d(dimension, n) {
     return utils.trim_short_line(l2, utils.MIN_DISTANCE)
 }
 
+
+function genSphere4(dimension) {
+    const step = 3
+    const pi2 = 2 * Math.PI
+    const das = []
+    let da = pi2 / step
+    for (let i = 0; i < dimension - 1; i++) {
+        das[i] = da
+        da = da / step
+    }
+    console.log(`angs: ${utils.format(das)}`)
+
+    let prev = utils.zero(dimension)
+    prev[dimension - 1] = 1
+    const lastDa = das[das.length - 1]
+    let sum = lastDa
+    const lines = []
+    const zero = utils.zero(dimension)
+    while (sum < pi2) {
+
+        for (let i = 0; i < dimension - 1; i++) {
+            let cur = prev
+            cur = rotate_point(cur, das[i], i, i + 1)
+            const line = [prev, cur]
+            lines.push(line)
+            prev = utils.clone(cur)
+            // console.log(`rotate[${i}, ${i + 1}]: ${das[i]}`)
+            // console.log(`cur[${i}]: ${JSON.stringify(cur)}`)
+        }
+        // console.log(`sum: ${sum} -> ${sum + lastDa}`)
+        sum += lastDa
+        // const line = [prev, cur]
+        // console.log(`line: ${JSON.stringify(line)}`)
+        // console.log(`distance: ${utils.distance(zero, cur)}`)
+        // lines.push(line)
+        // prev = utils.clone(cur)
+    }
+    console.log(`sphere raw lines: ${lines.length}`)
+    return lines
+}
+
+function genQuasiSphere(dimension, lineNum) {
+
+    const pi2 = 2 * Math.PI
+    const perCircle = 36
+    const das = [pi2 / lineNum, pi2 / perCircle]
+    const angs = [0, 0]
+
+    const vec = utils.zero(dimension)
+    vec[0] = 1
+
+    const lines = []
+    let prev = vec
+    while (angs[0] < pi2) {
+        for (let i = 0; i < 2; i++) {
+            angs[i] += das[i]
+        }
+        let cur = utils.clone(vec)
+        for (let i = 0; i < dimension - 2; i++) {
+            cur = rotate_point(cur, angs[0], i, i + 1)
+        }
+        cur = rotate_point(cur, angs[1], dimension - 2, dimension - 1)
+        const line = [prev, cur]
+        lines.push(line)
+        prev = cur
+    }
+    console.log(`sphere raw lines: ${lines.length}`)
+    return lines
+}
+
 function genCube(dimension) {
     const ps = []
     const vs = [-0.5, 0.5]
@@ -266,6 +337,8 @@ function create_shape(name, dimension) {
             return genUnitCube(dimension)
         case Shapes.Circle:
             return genCircles(dimension)
+        case Shapes.QuasiSphere:
+            return genQuasiSphere(dimension, 2000)
         case Shapes.Sphere3D:
             return genSphere3d(dimension, 24)
         case Shapes.Octahedron3D:
