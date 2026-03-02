@@ -8,6 +8,8 @@ export const Shapes = Object.freeze({
     GrayCube: "Gray线",
     Circle: "圆圈",
     QuasiSphere: "类球体",
+    QuasiSphereY: "类球体Y",
+    QuasiSphereXY: "类球体XY",
     Square2D: "正方形2D",
     Circle2D: "圆形2D",
     Sphere3D: "球体3D",
@@ -197,7 +199,64 @@ function genSphere4(dimension) {
     return lines
 }
 
-function genQuasiSphere(dimension, lineNum) {
+function genOneQuasiSpher(dimension, das, axis) {
+    const axNum = dimension - 2
+    const angs = [0, 0]
+    const axes = [(axis - 2 + dimension) % dimension, (axis - 1 + dimension) % dimension]
+    const vec = utils.zero(dimension)
+    vec[axis] = 1
+    const lines = []
+    let prev = vec
+    while (angs[0] < 2 * Math.PI) {
+        for (let i = 0; i < 2; i++) {
+            angs[i] += das[i]
+        }
+        let cur = utils.clone(vec)
+        for (let i = 0; i < axNum; i++) {
+            const ax1 = (i + axis) % dimension
+            const ax2 = (i + axis + 1) % dimension
+            cur = rotate_point(cur, angs[0], ax1, ax2)
+        }
+        cur = rotate_point(cur, angs[1], axes[0], axes[1])
+        const line = [prev, cur]
+        lines.push(line)
+        prev = cur
+    }
+    return lines
+}
+
+function genQuasiSphereAll(dimension) {
+    const lineNum = 3000 / dimension
+    const pi2 = 2 * Math.PI
+    const perCircle = 36
+    const lines = []
+    for (let i = 0; i < dimension; i++) {
+        const das = [pi2 / lineNum, pi2 / perCircle]
+        const sph = genOneQuasiSpher(dimension, das, i)
+        lines.push(...sph)
+    }
+    console.log(`sphere raw lines: ${lines.length}`)
+    return lines
+
+}
+
+// params = [[axis, lineNum], [...], ...]
+function genQuasiSphere(dimension, ...params) {
+    const pi2 = 2 * Math.PI
+    const perCircle = 36
+    const lines = []
+    for (let i = 0; i < params.length; i++) {
+        const axis = params[i][0]
+        const lineNum = params[i][1]
+        const das = [pi2 / lineNum, pi2 / perCircle]
+        const sph = genOneQuasiSpher(dimension, das, axis)
+        lines.push(...sph)
+    }
+    console.log(`sphere raw lines: ${lines.length}`)
+    return lines
+}
+
+function genQuasiSphereOk(dimension, lineNum) {
 
     const pi2 = 2 * Math.PI
     const perCircle = 36
@@ -337,8 +396,12 @@ function create_shape(name, dimension) {
             return genUnitCube(dimension)
         case Shapes.Circle:
             return genCircles(dimension)
+        case Shapes.QuasiSphereY:
+            return genQuasiSphere(dimension, [1, 1500])
+        case Shapes.QuasiSphereXY:
+            return genQuasiSphere(dimension, [0, 1200], [1, 1200])
         case Shapes.QuasiSphere:
-            return genQuasiSphere(dimension, 2000)
+            return genQuasiSphereAll(dimension)
         case Shapes.Sphere3D:
             return genSphere3d(dimension, 24)
         case Shapes.Octahedron3D:

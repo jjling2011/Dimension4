@@ -32,7 +32,7 @@ function main() {
         // 2. select dimention
         elCoordDimension.val(4).change()
         elShapeDimension.val(4).change()
-        elShapeName.val(Shapes.QuasiSphere).change()
+        elShapeName.val(Shapes.QuasiSphereY).change()
         elShapePlane.val("xy").change()
 
         utils.header()
