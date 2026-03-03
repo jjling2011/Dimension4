@@ -13,7 +13,7 @@ function main() {
     const elShapePlane = $("#shape-rotate-plane")
 
     const elCoordType = $("#coord-type")
-    const elCoordDimension = $("#coord-dimension")
+    const elCoordAxes = $("#coord-axes")
     const elCoordPlane = $("#coord-rotate-plane")
 
     const board = new Board("board")
@@ -30,8 +30,8 @@ function main() {
         elCoordType.val(Mappers.Avg)
 
         // 2. select dimention
-        elCoordDimension.val(4).change()
-        elShapeDimension.val(4).change()
+        elCoordAxes.val("xyz").change()
+        elShapeDimension.val(3).change()
         elShapeName.val(Shapes.QuasiSphereY).change()
         elShapePlane.val("xy").change()
 
@@ -49,26 +49,27 @@ function main() {
     }
 
     function update_shape_settings() {
-        const d = get_max_dim()
+        const d = get_shape_dim()
         fill_options(elShapePlane, utils.get_planes(d))
     }
 
     function update_coord_settings() {
-        const dimension = elCoordDimension.val()
-        const name = elCoordType.val()
-        coord.reset_coord(dimension, name)
-        fill_options(elCoordPlane, utils.get_planes(dimension))
+        const axes_str = elCoordAxes.val()
+        const axes = utils.axes_to_idxes(axes_str)
+        const coordType = elCoordType.val()
+        coord.reset_coord(axes, coordType)
+
+        const planes = utils.get_coord_planes(axes)
+        fill_options(elCoordPlane, planes)
     }
 
-    function get_max_dim() {
-        const shape_dim = parseInt(elShapeDimension.val())
-        const coord_dim = parseInt(elCoordDimension.val())
-        return Math.max(shape_dim, coord_dim)
+    function get_shape_dim() {
+        return parseInt(elShapeDimension.val())
     }
 
     function load_shape() {
         const name = elShapeName.val()
-        const d = get_max_dim()
+        const d = get_shape_dim()
         cur_shape = get_shape_by_name(name, d)
     }
 
@@ -173,11 +174,8 @@ function main() {
             update_canvas()
         })
 
-        elCoordDimension.on("change", () => {
-            stop_rotate()
+        elCoordAxes.on("change", () => {
             update_coord_settings()
-            update_shape_settings()
-            load_shape()
             update_canvas()
         })
 
@@ -200,9 +198,13 @@ function main() {
 
     function init() {
         utils.header("init()")
-        init_element_event_handler()
+
+        fill_options(elShapeDimension, [2, 3, 4, 5, 6])
+        fill_options(elCoordAxes, utils.get_coord_axes())
         fill_options(elShapeName, get_values(Shapes))
         fill_options(elCoordType, get_values(Mappers))
+        init_element_event_handler()
+
         update_board_settings()
         update_coord_settings()
         update_shape_settings()

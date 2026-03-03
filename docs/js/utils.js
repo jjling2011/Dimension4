@@ -1,4 +1,7 @@
 //#region constants
+export const MIN_DIMESION = 2
+export const MAX_DIMESION = 6
+
 export const MIN_DISTANCE = 0.00001
 export const MAX_DISTANCE = 1000000.00001
 export const MIN_ANG = 0.00001
@@ -8,6 +11,49 @@ export const AXIS_SIZE = 1.5
 //#endregion
 
 //#region public
+
+export function axes_to_idxes(axes) {
+    const r = []
+    for (let axis of axes) {
+        r.push(AXIS_NAMES.indexOf(axis))
+    }
+    return r
+}
+
+export function get_coord_axes() {
+    const r = []
+
+    const max = MAX_DIMESION
+    const axes = AXIS_NAMES.join("")
+    for (let i = MIN_DIMESION; i < max; i++) {
+        r.push(axes.substring(0, i))
+    }
+
+    for (let i = 0; i < max - 1; i++) {
+        for (let j = i + 1; j < max; j++) {
+            const plane = `${AXIS_NAMES[i]}${AXIS_NAMES[j]}`
+            if (r.indexOf(plane) < 0) {
+                r.push(plane)
+            }
+        }
+    }
+
+    return r
+}
+
+export function get_coord_planes(axes) {
+    const r = []
+    const d = axes.length
+    for (let i = 0; i < d - 1; i++) {
+        for (let j = i + 1; j < d; j++) {
+            const p1 = AXIS_NAMES[axes[i]]
+            const p2 = AXIS_NAMES[axes[j]]
+            r.push(`${p1}${p2}`)
+        }
+    }
+    return r
+}
+
 export function idx_to_plane(idx1, idx2) {
     const i1 = Math.min(idx1, idx2)
     const i2 = Math.max(idx1, idx2)
@@ -99,6 +145,7 @@ export function to_lines(ps, max_distance) {
 }
 
 export function zero(dimension) {
+    dimension = dimension || MAX_DIMESION
     return Array(dimension).fill(0)
 }
 

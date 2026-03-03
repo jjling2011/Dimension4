@@ -1,3 +1,5 @@
+import * as utils from "./utils.js"
+
 //#region  mapper names
 
 export const Mappers = Object.freeze({
@@ -205,10 +207,13 @@ mcache[Mappers.PI2] = function (dimension) {
 export class Mapper {
     #fns
     #dimension
+    #axes
 
-    constructor(dimension, coord_type) {
-        this.#dimension = dimension
-        this.#create_map_funcs(dimension, coord_type)
+    constructor(axes, coord_type) {
+        const d = axes.length
+        this.#axes = axes
+        this.#dimension = d
+        this.#create_map_funcs(d, coord_type)
     }
 
     //#region private
@@ -217,10 +222,18 @@ export class Mapper {
         this.#fns = creater(dimension)
     }
 
+    #to_coord_point(hdp) {
+        const p = utils.zero(this.#dimension)
+        for (let i = 0; i < this.#dimension; i++) {
+            p[i] = hdp[this.#axes[i]]
+        }
+        return p
+    }
     //#endregion
 
     //#region public
-    map(p) {
+    map(hdp) {
+        const p = this.#to_coord_point(hdp)
         let x = 0
         let y = 0
         for (let i = 0; i < this.#dimension; i++) {

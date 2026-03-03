@@ -1,8 +1,8 @@
 import * as utils from "./utils.js"
+import { Mapper } from "./mapper.js"
 
 export class Scene {
     #board
-    #dimension
     #mapper
 
     constructor(board) {
@@ -50,9 +50,8 @@ export class Scene {
     //#endregion
 
     //#region public
-    reset_map_funcs(dimension, mapper) {
-        this.#dimension = dimension
-        this.#mapper = mapper
+    reset_map_funcs(coord_axes, coord_type) {
+        this.#mapper = new Mapper(coord_axes, coord_type)
     }
 
     draw_text(p, text, color) {

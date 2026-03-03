@@ -8,6 +8,7 @@ export const Shapes = Object.freeze({
     GrayCube: "Gray线",
     Circle: "圆圈",
     QuasiSphere: "类球体",
+    QuasiSphereX: "类球体X",
     QuasiSphereY: "类球体Y",
     QuasiSphereXY: "类球体XY",
     Square2D: "正方形2D",
@@ -256,35 +257,6 @@ function genQuasiSphere(dimension, ...params) {
     return lines
 }
 
-function genQuasiSphereOk(dimension, lineNum) {
-
-    const pi2 = 2 * Math.PI
-    const perCircle = 36
-    const das = [pi2 / lineNum, pi2 / perCircle]
-    const angs = [0, 0]
-
-    const vec = utils.zero(dimension)
-    vec[0] = 1
-
-    const lines = []
-    let prev = vec
-    while (angs[0] < pi2) {
-        for (let i = 0; i < 2; i++) {
-            angs[i] += das[i]
-        }
-        let cur = utils.clone(vec)
-        for (let i = 0; i < dimension - 2; i++) {
-            cur = rotate_point(cur, angs[0], i, i + 1)
-        }
-        cur = rotate_point(cur, angs[1], dimension - 2, dimension - 1)
-        const line = [prev, cur]
-        lines.push(line)
-        prev = cur
-    }
-    console.log(`sphere raw lines: ${lines.length}`)
-    return lines
-}
-
 function genCube(dimension) {
     const ps = []
     const vs = [-0.5, 0.5]
@@ -396,6 +368,8 @@ function create_shape(name, dimension) {
             return genUnitCube(dimension)
         case Shapes.Circle:
             return genCircles(dimension)
+        case Shapes.QuasiSphereX:
+            return genQuasiSphere(dimension, [0, 1500])
         case Shapes.QuasiSphereY:
             return genQuasiSphere(dimension, [1, 1500])
         case Shapes.QuasiSphereXY:
@@ -414,15 +388,35 @@ function create_shape(name, dimension) {
     return genCube(dimension)
 }
 
+function expand_to_max_dimension(shape) {
+    if (!shape || shape.length < 1) {
+        return shape
+    }
+    const r = []
+    const sdim = shape[0][0].length
+    for (let i = 0; i < shape.length; i++) {
+        const start = utils.zero()
+        const end = utils.zero()
+        const line = shape[i]
+        for (let j = 0; j < sdim; j++) {
+            start[j] = line[0][j]
+            end[j] = line[1][j]
+        }
+        r.push([start, end])
+    }
+    return r
+}
+
 export function get_shape_by_name(name, dimension) {
     const key = `${name}@${dimension}`
     if (!cache[key]) {
         console.log(`create shape: ${key}`)
         const raw_shape = create_shape(name, dimension)
+        const hd_shape = expand_to_max_dimension(raw_shape)
         if (name === Shapes.MobiusStrip3D) {
-            cache[key] = utils.dlss(raw_shape, 3)
+            cache[key] = utils.dlss(hd_shape, 3)
         } else {
-            cache[key] = utils.dlss(raw_shape)
+            cache[key] = utils.dlss(hd_shape)
         }
     } else {
         console.log(`get shape from cache: ${key}`)

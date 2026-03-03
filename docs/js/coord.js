@@ -1,32 +1,27 @@
 import * as utils from "./utils.js"
 import { Scene } from "./scene.js"
-import { Mapper } from "./mapper.js"
+
 
 export class Coord {
-    #dimension
+    #axes
     #scene
     #angs
     #bulb
     #hires_axes
-    #axes
+    #axis_lines
 
     constructor(board) {
         this.#scene = new Scene(board)
-        this.reset_coord("2", "Avg")
+        this.reset_coord([0, 1], "Avg")
     }
 
     //#region public
-    get_dimension() {
-        return this.#dimension
-    }
 
-    reset_coord(dimension_str, coord_type) {
-        this.#set_dimesion(dimension_str)
-        const d = this.#dimension
+    reset_coord(axes, coord_type) {
+        this.#axes = axes
         this.reset_angs()
-        this.#gen_axes(d)
-        const mapper = new Mapper(d, coord_type)
-        this.#scene.reset_map_funcs(d, mapper)
+        this.#gen_axes()
+        this.#scene.reset_map_funcs(this.#axes, coord_type)
     }
 
     add_ang(plane, forward) {
@@ -37,7 +32,7 @@ export class Coord {
 
     reset_angs() {
         this.#angs = {}
-        for (let plane of utils.get_planes(this.#dimension)) {
+        for (let plane of utils.get_coord_planes(this.#axes)) {
             this.#angs[plane] = 0
         }
     }
@@ -49,48 +44,25 @@ export class Coord {
     }
 
     draw_shape(lines) {
-        const axes = utils.clone(this.#axes)
-        const shape = this.#copy_shape(lines)
+        const axis_lines = utils.clone(this.#axis_lines)
+        const shape = utils.clone(lines)
         shape.push(...utils.clone(this.#hires_axes))
-        for (let plane of utils.get_planes(this.#dimension)) {
-            this.#rotate_lines(axes, plane, this.#angs[plane])
+        for (let plane of utils.get_coord_planes(this.#axes)) {
+            this.#rotate_lines(axis_lines, plane, this.#angs[plane])
             this.#rotate_lines(shape, plane, this.#angs[plane])
         }
         this.#scene.clear()
         this.#scene.draw_shape(shape, this.#bulb)
-        this.#draw_axes_name(axes)
+        this.#draw_axes_name(axis_lines)
     }
     //#endregion
 
     //#region private utils
-    #copy_shape(lines) {
-        if (lines.length < 1 || !lines[0]) {
-            return []
-        }
 
-        const d = this.#dimension
-        const org_d = lines[0][0].length
-        if (org_d === d) {
-            return utils.clone(lines)
-        }
-
-        const r = []
-        for (let line of lines) {
-            const start = utils.zero(d)
-            const end = utils.zero(d)
-            for (let i = 0; i < d; i++) {
-                start[i] = line[0][i] || 0
-                end[i] = line[1][i] || 0
-            }
-            r.push([start, end])
-        }
-        return r
-    }
-
-    #gen_axes(dimension) {
-        this.#bulb = create_lightbulb(dimension)
-        this.#axes = create_axes(dimension)
-        this.#hires_axes = utils.dlss(this.#axes, 60)
+    #gen_axes() {
+        this.#bulb = this.#create_lightbulb()
+        this.#axis_lines = this.#create_axes()
+        this.#hires_axes = utils.dlss(this.#axis_lines, 60)
     }
 
     #rotate_lines(lines, plane, ang) {
@@ -109,41 +81,42 @@ export class Coord {
         p[i2] = x * Math.sin(ang) + y * Math.cos(ang)
     }
 
-    #draw_axes_name(axes) {
-        for (let i = 0; i < this.#dimension; i++) {
-            const end = axes[i][1]
-            this.#scene.draw_text(end, utils.AXIS_NAMES[i], "whitesmoke")
+    #draw_axes_name(axes_lines) {
+        for (let i = 0; i < axes_lines.length; i++) {
+            const axi = this.#axes[i]
+            const end = axes_lines[i][1]
+            this.#scene.draw_text(end, utils.AXIS_NAMES[axi], "whitesmoke")
         }
     }
 
-    #set_dimesion(s) {
-        this.#dimension = Number(s) || 2
+    #create_axes() {
+        const axes = this.#axes
+        const lines = []
+        for (let i = 0; i < axes.length; i++) {
+            const axi = axes[i]
+            const start = utils.zero()
+            const end = utils.zero()
+            start[axi] = -1 * utils.AXIS_SIZE
+            end[axi] = utils.AXIS_SIZE
+            lines.push([start, end])
+        }
+        return lines
     }
 
+    #create_lightbulb() {
+        const axes = this.#axes
+        const bulb = utils.zero()
+        bulb[axes[0]] = 5
+        bulb[axes[axes.length - 1]] = 5
+
+        const d = axes.length
+        if (d > 2) {
+            const half = Math.floor(d / 2)
+            bulb[axes[half]] = -5
+        }
+
+        console.log(`light bulb: ${bulb}`)
+        return bulb
+    }
     //#endregion
 }
-
-//#region helper funcs
-
-function create_axes(dimension) {
-    const lines = []
-    for (let i = 0; i < dimension; i++) {
-        const start = utils.zero(dimension)
-        const end = utils.zero(dimension)
-        start[i] = -1 * utils.AXIS_SIZE
-        end[i] = utils.AXIS_SIZE
-        lines.push([start, end])
-    }
-    return lines
-}
-
-function create_lightbulb(dimension) {
-    const bulb = utils.zero(dimension)
-    const half = Math.floor(dimension / 2)
-    bulb[0] = 5
-    bulb[half] = -5
-    bulb[dimension - 1] = 5
-    console.log(`light bulb: ${bulb}`)
-    return bulb
-}
-//#endregion
