@@ -25,16 +25,14 @@ export function get_coord_axes() {
 
     const max = MAX_DIMESION
     const axes = AXIS_NAMES.join("")
-    for (let i = MIN_DIMESION; i < max; i++) {
+    for (let i = max; i > MIN_DIMESION; i--) {
         r.push(axes.substring(0, i))
     }
 
     for (let i = 0; i < max - 1; i++) {
         for (let j = i + 1; j < max; j++) {
             const plane = `${AXIS_NAMES[i]}${AXIS_NAMES[j]}`
-            if (r.indexOf(plane) < 0) {
-                r.push(plane)
-            }
+            r.push(plane)
         }
     }
 
