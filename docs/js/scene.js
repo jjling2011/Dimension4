@@ -66,8 +66,6 @@ export class Scene {
     draw_shape(lines, bulb) {
         const scene = this.#dye(lines, bulb)
         scene.sort((a, b) => b[3] - a[3])
-
-        // draw begin
         for (let o of scene) {
             this.#draw_line(o[0], o[1], o[2])
         }

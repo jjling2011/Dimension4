@@ -9,7 +9,6 @@ export const Shapes = Object.freeze({
     Circle: "圆圈",
     QuasiSphere: "类球体",
     QuasiSphereX: "类球体X",
-    QuasiSphereY: "类球体Y",
     QuasiSphereXY: "类球体XY",
     Square2D: "正方形2D",
     Circle2D: "圆形2D",
@@ -185,16 +184,8 @@ function genSphere4(dimension) {
             const line = [prev, cur]
             lines.push(line)
             prev = utils.clone(cur)
-            // console.log(`rotate[${i}, ${i + 1}]: ${das[i]}`)
-            // console.log(`cur[${i}]: ${JSON.stringify(cur)}`)
         }
-        // console.log(`sum: ${sum} -> ${sum + lastDa}`)
         sum += lastDa
-        // const line = [prev, cur]
-        // console.log(`line: ${JSON.stringify(line)}`)
-        // console.log(`distance: ${utils.distance(zero, cur)}`)
-        // lines.push(line)
-        // prev = utils.clone(cur)
     }
     console.log(`sphere raw lines: ${lines.length}`)
     return lines
@@ -370,8 +361,6 @@ function create_shape(name, dimension) {
             return genCircles(dimension)
         case Shapes.QuasiSphereX:
             return genQuasiSphere(dimension, [0, 1500])
-        case Shapes.QuasiSphereY:
-            return genQuasiSphere(dimension, [1, 1500])
         case Shapes.QuasiSphereXY:
             return genQuasiSphere(dimension, [0, 1200], [1, 1200])
         case Shapes.QuasiSphere:

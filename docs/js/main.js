@@ -13,7 +13,7 @@ function main() {
     const elShapePlane = $("#shape-rotate-plane")
 
     const elCoordType = $("#coord-type")
-    const elCoordAxes = $("#coord-axes")
+    const elCoordAxes = $("#coord-axes-checkboxes")
     const elCoordPlane = $("#coord-rotate-plane")
 
     const board = new Board("board")
@@ -26,13 +26,11 @@ function main() {
     function debug() {
         utils.header("debug()")
 
-        // 1. select coord type
         elCoordType.val(Mappers.Avg)
+        select_coord_axes("xyz")
 
-        // 2. select dimention
-        elCoordAxes.val("xyz").change()
         elShapeDimension.val(3).change()
-        elShapeName.val(Shapes.QuasiSphereY).change()
+        elShapeName.val(Shapes.QuasiSphereX).change()
         elShapePlane.val("xy").change()
 
         utils.header()
@@ -54,7 +52,7 @@ function main() {
     }
 
     function update_coord_settings() {
-        const axes_str = elCoordAxes.val()
+        const axes_str = get_selected_coord_axes()
         const axes = utils.axes_to_idxes(axes_str)
         const coordType = elCoordType.val()
         coord.reset_coord(axes, coordType)
@@ -174,7 +172,7 @@ function main() {
             update_canvas()
         })
 
-        elCoordAxes.on("change", () => {
+        elCoordAxes.on('click', 'input[type="checkbox"]', () => {
             update_coord_settings()
             update_canvas()
         })
@@ -196,13 +194,60 @@ function main() {
         return Object.values(o)
     }
 
+    function get_selected_coord_axes() {
+        const axes = []
+        elCoordAxes.children('input:checkbox:checked').map((_, el) => {
+            const box = $(el)
+            const name = box.val()
+            axes.push(name)
+        })
+        return axes
+    }
+
+    function select_coord_axes(names) {
+        console.log(`select axes: ${names}`)
+        elCoordAxes.children("input:checkbox").map((_, el) => {
+            const box = $(el)
+            const name = box.val()
+            box.prop('checked', names.indexOf(name) >= 0)
+        })
+        update_coord_settings()
+    }
+
+    function init_coord_axes(names) {
+
+        // init checkboxes
+        const prefix = "axis-checkbox"
+        const axes = utils.AXIS_NAMES.slice(0, utils.MAX_DIMESION)
+        const checkboxes = axes.map((name, idx) => {
+            const id = `${prefix}-${idx}`
+            return `<input type="checkbox" id="${id}" value="${name}" class="${prefix}">
+                    <label for="${id}">${name}</label>`
+        }).join('\n')
+        elCoordAxes.html(checkboxes)
+
+        // init buttons
+        const button_container = $("#coord-axes-buttons")
+        for (let i = utils.MIN_DIMESION; i < utils.MAX_DIMESION; i++) {
+            const name = utils.AXIS_NAMES.slice(0, i + 1).join("");
+            $('<button>').text(name)
+                .on('click', () => {
+                    select_coord_axes(name)
+                    update_canvas()
+                })
+                .appendTo(button_container)
+        }
+        select_coord_axes(names)
+    }
+
     function init() {
         utils.header("init()")
 
         fill_options(elShapeDimension, [2, 3, 4, 5, 6])
-        fill_options(elCoordAxes, utils.get_coord_axes())
         fill_options(elShapeName, get_values(Shapes))
         fill_options(elCoordType, get_values(Mappers))
+        init_coord_axes("xyz")
+
         init_element_event_handler()
 
         update_board_settings()

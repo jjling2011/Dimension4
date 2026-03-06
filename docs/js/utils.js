@@ -20,25 +20,6 @@ export function axes_to_idxes(axes) {
     return r
 }
 
-export function get_coord_axes() {
-    const r = []
-
-    const max = MAX_DIMESION
-    const axes = AXIS_NAMES.join("")
-    for (let i = max; i > MIN_DIMESION; i--) {
-        r.push(axes.substring(0, i))
-    }
-
-    for (let i = 0; i < max - 1; i++) {
-        for (let j = i + 1; j < max; j++) {
-            const plane = `${AXIS_NAMES[i]}${AXIS_NAMES[j]}`
-            r.push(plane)
-        }
-    }
-
-    return r
-}
-
 export function get_coord_planes(axes) {
     const r = []
     const d = axes.length
@@ -201,9 +182,6 @@ export function format(o) {
 }
 
 export function clone(o) {
-    // Source - https://stackoverflow.com/a
-    // Posted by G. Ghez
-    // Retrieved 2025-12-24, License - CC BY-SA 3.0
     return JSON.parse(JSON.stringify(o))
 }
 

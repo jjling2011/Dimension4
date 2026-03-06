@@ -89,3 +89,7 @@ input {
     border: gray solid 1px;
     border-radius: 0.5rem;
 }
+
+.axis-checkbox {
+    width: 1.25rem;
+}
