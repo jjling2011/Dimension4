@@ -230,7 +230,7 @@ function main() {
         const button_container = $("#coord-axes-buttons")
         for (let i = utils.MIN_DIMESION; i < utils.MAX_DIMESION; i++) {
             const name = utils.AXIS_NAMES.slice(0, i + 1).join("");
-            $('<button>').text(name)
+            $('<button>').text(`${name.length}.${name}`)
                 .on('click', () => {
                     select_coord_axes(name)
                     update_canvas()
@@ -243,7 +243,7 @@ function main() {
     function init() {
         utils.header("init()")
 
-        fill_options(elShapeDimension, [2, 3, 4, 5, 6])
+        fill_options(elShapeDimension, utils.get_dimensions_array())
         fill_options(elShapeName, get_values(Shapes))
         fill_options(elCoordType, get_values(Mappers))
         init_coord_axes("xyz")

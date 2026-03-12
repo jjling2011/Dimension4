@@ -1,16 +1,27 @@
 //#region constants
+const ALPHABETS = "abcdefghijklmnopqrstuvwzyx" // 24
+
 export const MIN_DIMESION = 2
-export const MAX_DIMESION = 6
+export const MAX_DIMESION = 6 // 24 max
 
 export const MIN_DISTANCE = 0.00001
 export const MAX_DISTANCE = 1000000.00001
 export const MIN_ANG = 0.00001
 
-export const AXIS_NAMES = "abcdefghijklmnopqrstuvwzyx".split("").reverse()
+export const AXIS_NAMES = ALPHABETS.split("").reverse()
 export const AXIS_SIZE = 1.5
 //#endregion
 
 //#region public
+
+export function get_dimensions_array() {
+    const r = []
+    for (let i = MIN_DIMESION; i <= MAX_DIMESION; i++) {
+        const j = i
+        r.push(j)
+    }
+    return r
+}
 
 export function axes_to_idxes(axes) {
     const r = []
