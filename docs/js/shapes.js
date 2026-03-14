@@ -16,6 +16,7 @@ export const Shapes = Object.freeze({
     Octahedron3D: "正八面体3D",
     Sphere3D32: "稀疏球体3D",
     MobiusStrip3D: "莫比乌斯环3D",
+    OneDimDownWave: "降1维波形",
 })
 
 //#endregion
@@ -158,39 +159,6 @@ function genSphere3d(dimension, n) {
     return utils.trim_short_line(l2, utils.MIN_DISTANCE)
 }
 
-
-function genSphere4(dimension) {
-    const step = 3
-    const pi2 = 2 * Math.PI
-    const das = []
-    let da = pi2 / step
-    for (let i = 0; i < dimension - 1; i++) {
-        das[i] = da
-        da = da / step
-    }
-    console.log(`angs: ${utils.format(das)}`)
-
-    let prev = utils.zero(dimension)
-    prev[dimension - 1] = 1
-    const lastDa = das[das.length - 1]
-    let sum = lastDa
-    const lines = []
-    const zero = utils.zero(dimension)
-    while (sum < pi2) {
-
-        for (let i = 0; i < dimension - 1; i++) {
-            let cur = prev
-            cur = rotate_point(cur, das[i], i, i + 1)
-            const line = [prev, cur]
-            lines.push(line)
-            prev = utils.clone(cur)
-        }
-        sum += lastDa
-    }
-    console.log(`sphere raw lines: ${lines.length}`)
-    return lines
-}
-
 function genOneQuasiSpher(dimension, das, axis) {
     const axNum = dimension - 2
     const angs = [0, 0]
@@ -231,6 +199,44 @@ function genQuasiSphereAll(dimension) {
     return lines
 
 }
+
+function genOneDimDownWave(dimension) {
+    const lineNum = 1000
+    const perCircle = 36
+    const dx = 2 / lineNum
+
+    const pi2 = Math.PI * 2
+    const das = [pi2 * 1.5 / lineNum, pi2 / perCircle]
+    const angs = [0, 0]
+    const vec = utils.zero(dimension)
+    vec[dimension - 1] = 1
+    let x = -1
+    const lines = []
+    let prev = utils.clone(vec)
+    prev[0] = x
+    while (true) {
+        x += dx
+        for (let i = 0; i < 2; i++) {
+            angs[i] += das[i]
+        }
+        let cur = utils.clone(vec)
+        cur = rotate_point(cur, angs[0], 0, 1)
+        for (let i = dimension - 1; i > 2; i--) {
+            cur = rotate_point(cur, angs[0], i, i - 1)
+        }
+        cur = rotate_point(cur, angs[1], 2, 1)
+        cur[0] = x
+        const line = [prev, cur]
+        lines.push(line)
+        prev = cur
+        if (x > 1) {
+            break
+        }
+    }
+    console.log(`wave raw lines: ${lines.length}`)
+    return lines
+}
+
 
 // params = [[axis, lineNum], [...], ...]
 function genQuasiSphere(dimension, ...params) {
@@ -359,6 +365,8 @@ function create_shape(name, dimension) {
             return genUnitCube(dimension)
         case Shapes.Circle:
             return genCircles(dimension)
+        case Shapes.OneDimDownWave:
+            return genOneDimDownWave(dimension)
         case Shapes.QuasiSphereX:
             return genQuasiSphere(dimension, [0, 1500])
         case Shapes.QuasiSphereXY:

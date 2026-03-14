@@ -27,10 +27,10 @@ function main() {
         utils.header("debug()")
 
         elCoordType.val(Mappers.Avg)
-        select_coord_axes("xyz")
+        select_coord_axes("xy")
 
-        elShapeDimension.val(3).change()
-        elShapeName.val(Shapes.QuasiSphereX).change()
+        elShapeDimension.val(6).change()
+        elShapeName.val(Shapes.OneDimDownWave).change()
         elShapePlane.val("xy").change()
 
         utils.header()
