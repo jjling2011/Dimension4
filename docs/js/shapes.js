@@ -237,7 +237,6 @@ function genOneDimDownWave(dimension) {
     return lines
 }
 
-
 // params = [[axis, lineNum], [...], ...]
 function genQuasiSphere(dimension, ...params) {
     const pi2 = 2 * Math.PI
