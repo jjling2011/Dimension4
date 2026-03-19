@@ -159,7 +159,7 @@ function genSphere3d(dimension, n) {
     return utils.trim_short_line(l2, utils.MIN_DISTANCE)
 }
 
-function genOneQuasiSpher(dimension, das, axis) {
+function genOneQuasiSphere(dimension, das, axis) {
     const axNum = dimension - 2
     const angs = [0, 0]
     const axes = [(axis - 2 + dimension) % dimension, (axis - 1 + dimension) % dimension]
@@ -167,7 +167,7 @@ function genOneQuasiSpher(dimension, das, axis) {
     vec[axis] = 1
     const lines = []
     let prev = vec
-    while (angs[0] < 2 * Math.PI) {
+    while (angs[0] < 6 * Math.PI) {
         for (let i = 0; i < 2; i++) {
             angs[i] += das[i]
         }
@@ -192,7 +192,7 @@ function genQuasiSphereAll(dimension) {
     const lines = []
     for (let i = 0; i < dimension; i++) {
         const das = [pi2 / lineNum, pi2 / perCircle]
-        const sph = genOneQuasiSpher(dimension, das, i)
+        const sph = genOneQuasiSphere(dimension, das, i)
         lines.push(...sph)
     }
     console.log(`sphere raw lines: ${lines.length}`)
@@ -201,7 +201,7 @@ function genQuasiSphereAll(dimension) {
 }
 
 function genOneDimDownWave(dimension) {
-    const lineNum = 1000
+    const lineNum = 1500
     const perCircle = 36
     const dx = 2 / lineNum
 
@@ -246,7 +246,7 @@ function genQuasiSphere(dimension, ...params) {
         const axis = params[i][0]
         const lineNum = params[i][1]
         const das = [pi2 / lineNum, pi2 / perCircle]
-        const sph = genOneQuasiSpher(dimension, das, axis)
+        const sph = genOneQuasiSphere(dimension, das, axis)
         lines.push(...sph)
     }
     console.log(`sphere raw lines: ${lines.length}`)
