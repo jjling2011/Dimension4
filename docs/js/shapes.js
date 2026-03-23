@@ -7,16 +7,16 @@ export const Shapes = Object.freeze({
     UnitCube: "单位立方体",
     GrayCube: "Gray线",
     Circle: "圆圈",
-    QuasiSphere: "类球体",
-    QuasiSphereX: "类球体X",
-    QuasiSphereXY: "类球体XY",
+    SphereSpinner: "球面螺旋曲线",
+    SphereSpinnerX: "球面螺旋曲线X",
+    SphereSpinnerXY: "球面螺旋曲线XY",
+    MovingSpinner: "移动螺旋曲线",
     Square2D: "正方形2D",
     Circle2D: "圆形2D",
     Sphere3D: "球体3D",
     Octahedron3D: "正八面体3D",
     Sphere3D32: "稀疏球体3D",
     MobiusStrip3D: "莫比乌斯环3D",
-    OneDimDownWave: "降1维波形",
 })
 
 //#endregion
@@ -159,7 +159,7 @@ function genSphere3d(dimension, n) {
     return utils.trim_short_line(l2, utils.MIN_DISTANCE)
 }
 
-function genOneQuasiSphere(dimension, das, axis) {
+function genOneSphereSpinner(dimension, das, axis) {
     const axNum = dimension - 2
     const angs = [0, 0]
     const axes = [(axis - 2 + dimension) % dimension, (axis - 1 + dimension) % dimension]
@@ -185,14 +185,14 @@ function genOneQuasiSphere(dimension, das, axis) {
     return lines
 }
 
-function genQuasiSphereAll(dimension) {
+function genSphereSpinnerAll(dimension) {
     const lineNum = 3000 / dimension
     const pi2 = 2 * Math.PI
     const perCircle = 36
     const lines = []
     for (let i = 0; i < dimension; i++) {
         const das = [pi2 / lineNum, pi2 / perCircle]
-        const sph = genOneQuasiSphere(dimension, das, i)
+        const sph = genOneSphereSpinner(dimension, das, i)
         lines.push(...sph)
     }
     console.log(`sphere raw lines: ${lines.length}`)
@@ -200,7 +200,7 @@ function genQuasiSphereAll(dimension) {
 
 }
 
-function genOneDimDownWave(dimension) {
+function genMovingSpinner(dimension) {
     const lineNum = 1500
     const perCircle = 36
     const dx = 2 / lineNum
@@ -238,7 +238,7 @@ function genOneDimDownWave(dimension) {
 }
 
 // params = [[axis, lineNum], [...], ...]
-function genQuasiSphere(dimension, ...params) {
+function genSphereSpinner(dimension, ...params) {
     const pi2 = 2 * Math.PI
     const perCircle = 36
     const lines = []
@@ -246,7 +246,7 @@ function genQuasiSphere(dimension, ...params) {
         const axis = params[i][0]
         const lineNum = params[i][1]
         const das = [pi2 / lineNum, pi2 / perCircle]
-        const sph = genOneQuasiSphere(dimension, das, axis)
+        const sph = genOneSphereSpinner(dimension, das, axis)
         lines.push(...sph)
     }
     console.log(`sphere raw lines: ${lines.length}`)
@@ -364,14 +364,14 @@ function create_shape(name, dimension) {
             return genUnitCube(dimension)
         case Shapes.Circle:
             return genCircles(dimension)
-        case Shapes.OneDimDownWave:
-            return genOneDimDownWave(dimension)
-        case Shapes.QuasiSphereX:
-            return genQuasiSphere(dimension, [0, 1500])
-        case Shapes.QuasiSphereXY:
-            return genQuasiSphere(dimension, [0, 1200], [1, 1200])
-        case Shapes.QuasiSphere:
-            return genQuasiSphereAll(dimension)
+        case Shapes.MovingSpinner:
+            return genMovingSpinner(dimension)
+        case Shapes.SphereSpinnerX:
+            return genSphereSpinner(dimension, [0, 1500])
+        case Shapes.SphereSpinnerXY:
+            return genSphereSpinner(dimension, [0, 1200], [1, 1200])
+        case Shapes.SphereSpinner:
+            return genSphereSpinnerAll(dimension)
         case Shapes.Sphere3D:
             return genSphere3d(dimension, 24)
         case Shapes.Octahedron3D:

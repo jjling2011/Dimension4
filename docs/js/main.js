@@ -30,7 +30,7 @@ function main() {
         select_coord_axes("xy")
 
         elShapeDimension.val(6).change()
-        elShapeName.val(Shapes.OneDimDownWave).change()
+        elShapeName.val(Shapes.MovingSpinner).change()
         elShapePlane.val("xy").change()
 
         utils.header()
